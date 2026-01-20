@@ -359,11 +359,19 @@ function HomePage() {
                 key={meal.id}
                 onClick={() => setSelectedMeal(meal.id)}
                 disabled={!isAvailable && !menuQuery.isLoading}
+                style={{
+                  backgroundColor: isSelected
+                    ? 'var(--background)'
+                    : 'transparent',
+                  color: isSelected
+                    ? 'var(--foreground)'
+                    : 'var(--muted-foreground)',
+                  boxShadow: isSelected
+                    ? '0 1px 2px 0 rgb(0 0 0 / 0.05)'
+                    : 'none',
+                }}
                 className={cn(
                   'flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all',
-                  isSelected
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground',
                   !isAvailable &&
                     !menuQuery.isLoading &&
                     'opacity-40 cursor-not-allowed',
