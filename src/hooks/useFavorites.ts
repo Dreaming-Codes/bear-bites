@@ -1,12 +1,59 @@
-import { useCallback, useEffect, useMemo } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useSyncExternalStore,
+} from 'react'
 import { useSession } from '@/lib/auth-client'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useLiveQuery } from '@tanstack/react-db'
 import { favoritesCollection, type Favorite } from '@/db-collections'
 import { orpc } from '@/orpc/client'
 
 // Track if we've synced for this session (module-level to persist across hook instances)
 let hasInitialSynced = false
+
+// Cached empty array for SSR to avoid infinite loop
+const EMPTY_FAVORITES: Favorite[] = []
+
+/**
+ * SSR-safe wrapper for useLiveQuery that provides proper getServerSnapshot
+ * This avoids the "Missing getServerSnapshot" error during SSR
+ */
+function useSSRSafeFavoritesQuery(): Favorite[] {
+  const dataRef = useRef<Favorite[]>(EMPTY_FAVORITES)
+
+  const subscribe = useCallback((onStoreChange: () => void) => {
+    if (typeof window === 'undefined') {
+      return () => {}
+    }
+
+    const subscription = favoritesCollection.subscribeChanges(() => {
+      dataRef.current = Array.from(
+        favoritesCollection.state.values(),
+      ) as Favorite[]
+      onStoreChange()
+    })
+
+    dataRef.current = Array.from(
+      favoritesCollection.state.values(),
+    ) as Favorite[]
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
+
+  const getSnapshot = useCallback(() => {
+    return dataRef.current
+  }, [])
+
+  const getServerSnapshot = useCallback(() => {
+    return EMPTY_FAVORITES
+  }, [])
+
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+}
 
 export function useFavorites() {
   const { data: session } = useSession()
@@ -19,14 +66,7 @@ export function useFavorites() {
     }
   }, [isAuthenticated])
 
-  // Local favorites from TanStack DB using useLiveQuery
-  const { data: localFavorites = [] } = useLiveQuery(
-    (q) =>
-      q.from({ fav: favoritesCollection }).select(({ fav }) => ({
-        ...fav,
-      })),
-    [],
-  )
+  const localFavorites = useSSRSafeFavoritesQuery()
 
   const cloudFavoritesQuery = useQuery({
     ...orpc.favorites.getFavorites.queryOptions({ input: {} }),
