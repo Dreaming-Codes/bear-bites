@@ -153,30 +153,17 @@ function FavoriteCard({ favorite, onRemove }: FavoriteCardProps) {
   })
 
   return (
-    <GlassCard className="relative" hoverable>
-      <Link
-        to="/food/$itemId"
-        params={{ itemId: encodeURIComponent(favorite.foodId) }}
-        search={{
-          date: new Date().toISOString().split('T')[0],
-          locationId: favorite.locationId,
-          labelUrl: favorite.labelUrl || '',
-        }}
-        className="block pr-12"
-      >
+    <GlassCard className="relative">
+      <div className="pr-12">
         <h3 className="font-semibold text-foreground line-clamp-2">
           {favorite.foodName}
         </h3>
         <p className="text-sm text-muted-foreground mt-1">Added {addedDate}</p>
-      </Link>
+      </div>
 
       {/* Remove button */}
       <button
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          onRemove()
-        }}
+        onClick={onRemove}
         className={cn(
           'absolute top-4 right-4 p-2 rounded-full transition-all duration-200',
           'text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20',

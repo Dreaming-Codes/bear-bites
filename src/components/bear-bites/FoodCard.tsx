@@ -12,6 +12,7 @@ interface FoodCardProps {
   locationName?: string
   isFavorite?: boolean
   onToggleFavorite?: (item: MenuItem) => void
+  showStation?: boolean
   className?: string
 }
 
@@ -21,6 +22,7 @@ export function FoodCard({
   locationId,
   isFavorite = false,
   onToggleFavorite,
+  showStation = true,
   className,
 }: FoodCardProps) {
   return (
@@ -28,7 +30,12 @@ export function FoodCard({
       <Link
         to="/food/$itemId"
         params={{ itemId: encodeURIComponent(item.id) }}
-        search={{ date, locationId, labelUrl: item.labelUrl }}
+        search={{
+          date,
+          locationId,
+          labelUrl: item.labelUrl,
+          foodName: item.name,
+        }}
         className="block"
       >
         <div className="pr-10">
@@ -36,7 +43,9 @@ export function FoodCard({
             {item.name}
           </h3>
 
-          <p className="text-sm text-muted-foreground mb-2">{item.station}</p>
+          {showStation && (
+            <p className="text-sm text-muted-foreground mb-2">{item.station}</p>
+          )}
 
           {/* Dietary tags and allergens in one row */}
           {(item.dietaryTags.length > 0 || item.allergens.length > 0) && (
@@ -82,6 +91,7 @@ interface FoodGridProps {
   locationName?: string
   favorites?: Set<string>
   onToggleFavorite?: (item: MenuItem) => void
+  showStation?: boolean
   className?: string
 }
 
@@ -91,6 +101,7 @@ export function FoodGrid({
   locationId,
   favorites = new Set(),
   onToggleFavorite,
+  showStation = true,
   className,
 }: FoodGridProps) {
   if (items.length === 0) {
@@ -120,6 +131,7 @@ export function FoodGrid({
           locationId={locationId}
           isFavorite={favorites.has(item.id)}
           onToggleFavorite={onToggleFavorite}
+          showStation={showStation}
         />
       ))}
     </div>
@@ -134,6 +146,7 @@ interface StationGroupProps {
   locationName?: string
   favorites?: Set<string>
   onToggleFavorite?: (item: MenuItem) => void
+  showStationInCards?: boolean
 }
 
 export function StationGroup({
@@ -143,6 +156,7 @@ export function StationGroup({
   locationId,
   favorites,
   onToggleFavorite,
+  showStationInCards = false,
 }: StationGroupProps) {
   return (
     <div className="mb-6">
@@ -155,6 +169,7 @@ export function StationGroup({
         locationId={locationId}
         favorites={favorites}
         onToggleFavorite={onToggleFavorite}
+        showStation={showStationInCards}
       />
     </div>
   )
