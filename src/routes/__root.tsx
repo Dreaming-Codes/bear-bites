@@ -64,6 +64,9 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'yes',
       },
       {
+        name: "darkreader-lock",
+      },
+      {
         name: 'description',
         content:
           'Browse UCR dining hall menus, filter by dietary preferences, and save your favorite foods.',
