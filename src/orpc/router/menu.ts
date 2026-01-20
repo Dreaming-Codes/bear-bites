@@ -8,7 +8,9 @@ import {
   DayMenuSchema,
   FoodDetailSchema,
   MealSchema,
+  LOCATIONS,
 } from '@/lib/menu'
+import { buildLabelUrl } from '@/lib/menu/scraper'
 
 function getMenuService() {
   return createMenuService((env as Cloudflare.Env).MENU_CACHE)
@@ -56,12 +58,26 @@ export const getFoodDetail = os
   .input(
     z.object({
       itemId: z.string(),
-      labelUrl: z.string().url(),
+      locationId: z.string(),
+      date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), // YYYY-MM-DD format
     }),
   )
   .output(FoodDetailSchema.nullable())
   .handler(async ({ input }) => {
-    return getMenuService().getFoodDetail(input.itemId, input.labelUrl)
+    const location = LOCATIONS.find((l) => l.id === input.locationId)
+    if (!location) {
+      return null
+    }
+
+    const date = new Date(input.date + 'T12:00:00')
+    const labelUrl = buildLabelUrl(
+      input.itemId,
+      input.locationId,
+      location.name,
+      date,
+    )
+
+    return getMenuService().getFoodDetail(input.itemId, labelUrl)
   })
 
 export const searchMenuItems = os
@@ -163,4 +179,20 @@ export const getFilteredMenu = os
       ...menu,
       meals: filteredMeals,
     }
+  })
+
+export const getDateBounds = os
+  .input(
+    z.object({
+      locationId: z.string(),
+    }),
+  )
+  .output(
+    z.object({
+      minDate: z.string(),
+      maxDate: z.string(),
+    }),
+  )
+  .handler(async ({ input }) => {
+    return getMenuService().getDateBounds(input.locationId)
   })

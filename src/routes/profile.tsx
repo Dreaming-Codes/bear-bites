@@ -154,6 +154,17 @@ function ProfilePage() {
         <div className="text-center text-sm text-muted-foreground mt-8">
           <p>Bear Bites v1.0.0</p>
           <p>UCR Dining Menu</p>
+          <p className="mt-2">
+            Made with ❤️ by{' '}
+            <a
+              href="https://dreaming.codes"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              DreamingCodes
+            </a>
+          </p>
         </div>
       </Container>
     </PageWrapper>

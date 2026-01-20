@@ -316,3 +316,17 @@ export function buildMenuUrl(
 export function formatDateISO(date: Date): string {
   return date.toISOString().split('T')[0]
 }
+
+export function buildLabelUrl(
+  itemId: string,
+  locationId: string,
+  locationName: string,
+  date: Date,
+): string {
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  const year = date.getFullYear()
+  const dateStr = `${month}/${day}/${year}`
+
+  return `${FOODPRO_BASE_URL}/label.aspx?locationNum=${locationId}&locationName=${encodeURIComponent(locationName)}&dtdate=${encodeURIComponent(dateStr)}&RecNumAndPort=${encodeURIComponent(itemId)}`
+}

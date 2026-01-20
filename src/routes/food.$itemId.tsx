@@ -19,10 +19,8 @@ import { useFavorites } from '@/hooks/useFavorites'
 import { LOCATIONS } from '@/lib/menu/schemas'
 
 const searchSchema = z.object({
-  date: z.string().optional(),
-  locationId: z.string().optional(),
-  labelUrl: z.string(),
-  foodName: z.string().optional(),
+  date: z.string(),
+  locationId: z.string(),
 })
 
 export const Route = createFileRoute('/food/$itemId')({
@@ -189,27 +187,28 @@ function NutritionLabel({ nutrition }: { nutrition: Nutrition }) {
 
 function FoodDetailPage() {
   const { itemId } = Route.useParams()
-  const { labelUrl, locationId, foodName } = Route.useSearch()
+  const { date, locationId } = Route.useSearch()
   const router = useRouter()
   const { isFavorite, toggleFavorite } = useFavorites()
 
+  const state = router.state.location.state as { foodName?: string } | undefined
+  const foodName = state?.foodName
+
   const decodedItemId = decodeURIComponent(itemId)
 
-  // Get location name for favorites
   const location = LOCATIONS.find((l) => l.id === locationId) || LOCATIONS[1]
 
-  // Fetch food detail
   const foodQuery = useQuery(
     orpc.menu.getFoodDetail.queryOptions({
       input: {
         itemId: decodedItemId,
-        labelUrl,
+        locationId,
+        date,
       },
     }),
   )
 
   const food = foodQuery.data
-  // Use foodName from search params if available, otherwise fall back to scraped name
   const displayName = foodName || food?.name || 'Unknown'
   const isItemFavorite = food ? isFavorite(food.id) : false
 
@@ -220,7 +219,6 @@ function FoodDetailPage() {
       foodName: displayName,
       locationId: location.id,
       locationName: location.name,
-      labelUrl,
     })
   }
 
