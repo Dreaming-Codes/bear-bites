@@ -220,13 +220,31 @@ function HomePage() {
     )
   }, [menuQuery.data])
 
+  const dateBoundsQuery = useQuery(
+    orpc.menu.getDateBounds.queryOptions({
+      input: { locationId: selectedLocation.id },
+    }),
+  )
+
+  const minDate = dateBoundsQuery.data?.minDate
+    ? new Date(dateBoundsQuery.data.minDate + 'T12:00:00')
+    : null
+  const maxDate = dateBoundsQuery.data?.maxDate
+    ? new Date(dateBoundsQuery.data.maxDate + 'T12:00:00')
+    : null
+
+  const canGoBack = minDate ? selectedDate > minDate : true
+  const canGoForward = maxDate ? selectedDate < maxDate : true
+
   const goToPreviousDay = () => {
+    if (!canGoBack) return
     const newDate = new Date(selectedDate)
     newDate.setDate(newDate.getDate() - 1)
     setSelectedDate(newDate)
   }
 
   const goToNextDay = () => {
+    if (!canGoForward) return
     const newDate = new Date(selectedDate)
     newDate.setDate(newDate.getDate() + 1)
     setSelectedDate(newDate)
@@ -280,7 +298,11 @@ function HomePage() {
           <div className="flex items-center justify-between">
             <button
               onClick={goToPreviousDay}
-              className="p-2 rounded-lg hover:bg-muted transition-colors"
+              disabled={!canGoBack}
+              className={cn(
+                'p-2 rounded-lg transition-colors',
+                canGoBack ? 'hover:bg-muted' : 'opacity-30 cursor-not-allowed',
+              )}
               aria-label="Previous day"
             >
               <ChevronLeft size={24} />
@@ -312,7 +334,13 @@ function HomePage() {
 
             <button
               onClick={goToNextDay}
-              className="p-2 rounded-lg hover:bg-muted transition-colors"
+              disabled={!canGoForward}
+              className={cn(
+                'p-2 rounded-lg transition-colors',
+                canGoForward
+                  ? 'hover:bg-muted'
+                  : 'opacity-30 cursor-not-allowed',
+              )}
               aria-label="Next day"
             >
               <ChevronRight size={24} />

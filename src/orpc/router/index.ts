@@ -5,6 +5,7 @@ import {
   getFoodDetail,
   searchMenuItems,
   getFilteredMenu,
+  getDateBounds,
 } from './menu'
 import {
   getFavorites,
@@ -22,6 +23,7 @@ export default {
     getFoodDetail,
     searchMenuItems,
     getFilteredMenu,
+    getDateBounds,
   },
 
   favorites: {

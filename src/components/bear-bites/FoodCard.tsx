@@ -30,12 +30,8 @@ export function FoodCard({
       <Link
         to="/food/$itemId"
         params={{ itemId: encodeURIComponent(item.id) }}
-        search={{
-          date,
-          locationId,
-          labelUrl: item.labelUrl,
-          foodName: item.name,
-        }}
+        search={{ date, locationId }}
+        state={{ foodName: item.name } as any}
         className="block"
       >
         <div className="pr-10">
