@@ -6,6 +6,8 @@
   "main": "@tanstack/react-start/server-entry",
   "account_id": "de6b8d71384c18545348ad14570b9c5f",
 
+  "routes": [{ "pattern": "bearbites.dreaming.codes", "custom_domain": true }],
+
   "d1_databases": [
     {
       "binding": "DB",

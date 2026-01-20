@@ -6,5 +6,9 @@ export const betterAuthOptions = {
   emailAndPassword: {
     enabled: false, // Only Google OAuth for simplicity
   },
-  trustedOrigins: ['http://localhost:3000', 'https://bear-bites.pages.dev'],
+  trustedOrigins: [
+    'http://localhost:3000',
+    'https://bear-bites.dreamingcodes.workers.dev',
+    'https://bearbites.dreaming.codes',
+  ],
 } satisfies Partial<BetterAuthOptions>
