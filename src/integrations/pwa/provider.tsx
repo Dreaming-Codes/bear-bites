@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useState, useRef, useCallback, type ReactNode } from 'react'
 import {
   PWADevContext,
   type PWADevOverrides,
@@ -14,6 +14,8 @@ export function PWADevProvider({ children }: PWADevProviderProps) {
   const [overrides, setOverridesState] = useState<PWADevOverrides>({})
   const detectedPlatformInfo = detectPlatform()
 
+  const forcePromptCallbacks = useRef<Set<() => void>>(new Set())
+
   const setOverrides = (newOverrides: PWADevOverrides) => {
     setOverridesState(newOverrides)
   }
@@ -22,6 +24,17 @@ export function PWADevProvider({ children }: PWADevProviderProps) {
     setOverridesState({})
   }
 
+  const forceShowPrompt = useCallback(() => {
+    forcePromptCallbacks.current.forEach((callback) => callback())
+  }, [])
+
+  const subscribeToForcePrompt = useCallback((callback: () => void) => {
+    forcePromptCallbacks.current.add(callback)
+    return () => {
+      forcePromptCallbacks.current.delete(callback)
+    }
+  }, [])
+
   return (
     <PWADevContext.Provider
       value={{
@@ -29,6 +42,8 @@ export function PWADevProvider({ children }: PWADevProviderProps) {
         setOverrides,
         clearOverrides,
         detectedPlatformInfo,
+        forceShowPrompt,
+        subscribeToForcePrompt,
       }}
     >
       {children}
@@ -44,14 +59,10 @@ export function createPWADevtoolsPlugin() {
 }
 
 function PWADevtoolsPanelWrapper() {
-  // We need to access the context from within the tree
-  // This component will be rendered inside TanStack devtools
-  // but it's outside our provider, so we need a different approach
   return <PWADevtoolsPanelConnected />
 }
 
 function PWADevtoolsPanelConnected() {
-  // Import the hook directly to access the context
   const context = usePWADevContextInternal()
 
   if (!context) {
@@ -68,6 +79,7 @@ function PWADevtoolsPanelConnected() {
       overrides={context.overrides}
       setOverrides={context.setOverrides}
       clearOverrides={context.clearOverrides}
+      forceShowPrompt={context.forceShowPrompt}
     />
   )
 }

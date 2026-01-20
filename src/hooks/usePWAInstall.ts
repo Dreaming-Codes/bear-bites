@@ -54,6 +54,8 @@ interface PWADevContextValue {
   setOverrides: (overrides: PWADevOverrides) => void
   clearOverrides: () => void
   detectedPlatformInfo: PlatformInfo
+  forceShowPrompt: () => void
+  subscribeToForcePrompt: (callback: () => void) => () => void
 }
 
 const PWADevContext = createContext<PWADevContextValue | null>(null)
