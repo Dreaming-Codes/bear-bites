@@ -1,6 +1,7 @@
-const CACHE_NAME = 'bear-bites-v1'
-const STATIC_CACHE_NAME = 'bear-bites-static-v1'
-const DYNAMIC_CACHE_NAME = 'bear-bites-dynamic-v1'
+const APP_VERSION = '__APP_VERSION__'
+const CACHE_NAME = `bear-bites-${APP_VERSION}`
+const STATIC_CACHE_NAME = `bear-bites-static-${APP_VERSION}`
+const DYNAMIC_CACHE_NAME = `bear-bites-dynamic-${APP_VERSION}`
 
 const STATIC_ASSETS = [
   '/',
