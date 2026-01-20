@@ -35,6 +35,9 @@ function serviceWorkerVersionPlugin() {
 }
 
 const config = defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(appVersion),
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

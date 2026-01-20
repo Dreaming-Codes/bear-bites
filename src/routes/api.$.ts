@@ -10,6 +10,7 @@ import { env } from 'cloudflare:workers'
 
 import router from '@/orpc/router'
 import { createAuth } from '@/lib/auth'
+import { APP_VERSION } from '@/lib/version'
 
 const handler = new OpenAPIHandler(router, {
   interceptors: [
@@ -26,7 +27,7 @@ const handler = new OpenAPIHandler(router, {
       specGenerateOptions: {
         info: {
           title: 'TanStack ORPC Playground',
-          version: '1.0.0',
+          version: APP_VERSION,
         },
         commonSchemas: {
           UndefinedError: { error: 'UndefinedError' },
