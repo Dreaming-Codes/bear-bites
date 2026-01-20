@@ -25,7 +25,7 @@ import { FoodGrid, StationGroup } from '@/components/bear-bites/FoodCard'
 import { cn } from '@/lib/utils'
 import { useFavorites } from '@/hooks/useFavorites'
 import { usePersistedFilters } from '@/hooks/usePersistedFilters'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const searchSchema = z.object({
   date: z.string().optional(),
@@ -67,8 +67,9 @@ function formatDisplayDate(date: Date): string {
   })
 }
 
-// Get current meal period based on time
 function getCurrentMeal(): Meal {
+  // Return a stable default for SSR, will be corrected on client
+  if (typeof window === 'undefined') return 'breakfast'
   const hour = new Date().getHours()
   if (hour < 10) return 'breakfast'
   if (hour < 14) return 'lunch'
@@ -85,10 +86,16 @@ function HomePage() {
   const navigate = useNavigate()
   const search = Route.useSearch()
 
+    const [isHydrated, setIsHydrated] = useState(false)
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
+
   const selectedDate = search.date ? parseDate(search.date) : new Date()
   const selectedLocation =
     LOCATIONS.find((l) => l.id === search.location) || LOCATIONS[1]
-  const selectedMeal: Meal = search.meal || getCurrentMeal()
+  const selectedMeal: Meal =
+    search.meal || (isHydrated ? getCurrentMeal() : 'breakfast')
   const groupByStation = search.view !== 'all'
 
   const [isFilterOpen, setIsFilterOpen] = useState(false)
@@ -359,19 +366,11 @@ function HomePage() {
                 key={meal.id}
                 onClick={() => setSelectedMeal(meal.id)}
                 disabled={!isAvailable && !menuQuery.isLoading}
-                style={{
-                  backgroundColor: isSelected
-                    ? 'var(--background)'
-                    : 'transparent',
-                  color: isSelected
-                    ? 'var(--foreground)'
-                    : 'var(--muted-foreground)',
-                  boxShadow: isSelected
-                    ? '0 1px 2px 0 rgb(0 0 0 / 0.05)'
-                    : 'none',
-                }}
                 className={cn(
                   'flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all',
+                  isSelected
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground',
                   !isAvailable &&
                     !menuQuery.isLoading &&
                     'opacity-40 cursor-not-allowed',
