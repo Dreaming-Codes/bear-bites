@@ -1,0 +1,380 @@
+@import 'tailwindcss';
+
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+body {
+  @apply m-0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family:
+    source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+:root {
+  /* UCR Brand Colors */
+  --ucr-blue: #003da5;
+  --ucr-blue-dark: #002b75;
+  --ucr-blue-light: #1a5bc4;
+  --ucr-gold: #ffb81c;
+  --ucr-gold-dark: #e5a500;
+  --ucr-gold-light: #ffcc4d;
+
+  /* Bear Bites Theme - Light Mode */
+  --background: oklch(0.98 0.005 250);
+  --foreground: oklch(0.15 0.02 250);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0.02 250);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.15 0.02 250);
+  --primary: oklch(0.45 0.18 250); /* UCR Blue */
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.82 0.15 85); /* UCR Gold */
+  --secondary-foreground: oklch(0.15 0.02 250);
+  --muted: oklch(0.96 0.005 250);
+  --muted-foreground: oklch(0.5 0.02 250);
+  --accent: oklch(0.82 0.15 85);
+  --accent-foreground: oklch(0.15 0.02 250);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.9 0.01 250);
+  --input: oklch(0.9 0.01 250);
+  --ring: oklch(0.45 0.18 250);
+  --chart-1: oklch(0.45 0.18 250);
+  --chart-2: oklch(0.82 0.15 85);
+  --chart-3: oklch(0.55 0.15 150);
+  --chart-4: oklch(0.65 0.2 30);
+  --chart-5: oklch(0.6 0.15 300);
+  --radius: 0.75rem;
+
+  /* Glassmorphism tokens */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-shadow: 0 8px 32px rgba(0, 61, 165, 0.1);
+  --glass-blur: 12px;
+
+  /* Dietary tag colors */
+  --vegan-bg: oklch(0.85 0.15 145);
+  --vegan-text: oklch(0.3 0.1 145);
+  --vegetarian-bg: oklch(0.85 0.12 130);
+  --vegetarian-text: oklch(0.3 0.08 130);
+  --gluten-free-bg: oklch(0.88 0.1 85);
+  --gluten-free-text: oklch(0.35 0.08 85);
+
+  /* Allergen warning colors */
+  --allergen-bg: oklch(0.92 0.08 30);
+  --allergen-text: oklch(0.4 0.12 30);
+}
+
+.dark {
+  /* Bear Bites Theme - Dark Mode */
+  --background: oklch(0.15 0.02 250);
+  --foreground: oklch(0.95 0.005 250);
+  --card: oklch(0.2 0.02 250);
+  --card-foreground: oklch(0.95 0.005 250);
+  --popover: oklch(0.2 0.02 250);
+  --popover-foreground: oklch(0.95 0.005 250);
+  --primary: oklch(0.55 0.2 250); /* Lighter UCR Blue for dark mode */
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.75 0.15 85); /* UCR Gold */
+  --secondary-foreground: oklch(0.15 0.02 250);
+  --muted: oklch(0.25 0.02 250);
+  --muted-foreground: oklch(0.65 0.01 250);
+  --accent: oklch(0.75 0.15 85);
+  --accent-foreground: oklch(0.15 0.02 250);
+  --destructive: oklch(0.45 0.18 25);
+  --destructive-foreground: oklch(0.95 0.05 25);
+  --border: oklch(0.3 0.02 250);
+  --input: oklch(0.3 0.02 250);
+  --ring: oklch(0.55 0.2 250);
+  --chart-1: oklch(0.55 0.2 250);
+  --chart-2: oklch(0.75 0.15 85);
+  --chart-3: oklch(0.6 0.15 150);
+  --chart-4: oklch(0.7 0.2 30);
+  --chart-5: oklch(0.65 0.15 300);
+
+  /* Glassmorphism tokens - dark mode */
+  --glass-bg: rgba(30, 40, 60, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+  /* Dietary tag colors - dark mode */
+  --vegan-bg: oklch(0.35 0.12 145);
+  --vegan-text: oklch(0.85 0.1 145);
+  --vegetarian-bg: oklch(0.35 0.1 130);
+  --vegetarian-text: oklch(0.85 0.08 130);
+  --gluten-free-bg: oklch(0.38 0.08 85);
+  --gluten-free-text: oklch(0.88 0.08 85);
+
+  /* Allergen warning colors - dark mode */
+  --allergen-bg: oklch(0.35 0.1 30);
+  --allergen-text: oklch(0.9 0.08 30);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* UCR Brand Colors for Tailwind */
+  --color-ucr-blue: var(--ucr-blue);
+  --color-ucr-blue-dark: var(--ucr-blue-dark);
+  --color-ucr-blue-light: var(--ucr-blue-light);
+  --color-ucr-gold: var(--ucr-gold);
+  --color-ucr-gold-dark: var(--ucr-gold-dark);
+  --color-ucr-gold-light: var(--ucr-gold-light);
+
+  /* Dietary & Allergen colors */
+  --color-vegan-bg: var(--vegan-bg);
+  --color-vegan-text: var(--vegan-text);
+  --color-vegetarian-bg: var(--vegetarian-bg);
+  --color-vegetarian-text: var(--vegetarian-text);
+  --color-gluten-free-bg: var(--gluten-free-bg);
+  --color-gluten-free-text: var(--gluten-free-text);
+  --color-allergen-bg: var(--allergen-bg);
+  --color-allergen-text: var(--allergen-text);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Glassmorphism styles - using regular CSS since Tailwind v4 handles @layer differently */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+
+.glass-button {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.glass-button:hover {
+  background: rgba(255, 255, 255, 0.85);
+  transform: translateY(-1px);
+}
+
+.dark .glass-button:hover {
+  background: rgba(50, 60, 80, 0.85);
+}
+
+/* Dietary tag badges */
+.badge-vegan {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: var(--vegan-bg);
+  color: var(--vegan-text);
+}
+
+.badge-vegetarian {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: var(--vegetarian-bg);
+  color: var(--vegetarian-text);
+}
+
+.badge-gluten-free {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: var(--gluten-free-bg);
+  color: var(--gluten-free-text);
+}
+
+.badge-allergen {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: var(--allergen-bg);
+  color: var(--allergen-text);
+}
+
+/* Bear Bites gradient backgrounds */
+.bg-bear-gradient {
+  background: linear-gradient(
+    135deg,
+    var(--ucr-blue) 0%,
+    var(--ucr-blue-dark) 100%
+  );
+}
+
+.bg-bear-gradient-light {
+  background: linear-gradient(
+    135deg,
+    var(--ucr-blue-light) 0%,
+    var(--ucr-blue) 100%
+  );
+}
+
+.bg-gold-gradient {
+  background: linear-gradient(
+    135deg,
+    var(--ucr-gold) 0%,
+    var(--ucr-gold-dark) 100%
+  );
+}
+
+/* Mobile-first responsive container */
+.container-app {
+  width: 100%;
+  max-width: 28rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 768px) {
+  .container-app {
+    max-width: 42rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-app {
+    max-width: 56rem;
+  }
+}
+
+/* Nutrition label styling */
+.nutrition-label {
+  border: 2px solid var(--foreground);
+  padding: 1rem;
+  font-family: inherit;
+  max-width: 20rem;
+}
+
+.nutrition-label h2 {
+  font-size: 1.5rem;
+  font-weight: 900;
+  margin-bottom: 0.25rem;
+}
+
+.nutrition-label hr {
+  border-color: var(--foreground);
+  margin: 0.25rem 0;
+}
+
+.nutrition-label hr.thick {
+  border-width: 4px;
+  border-color: var(--foreground);
+}
+
+.nutrition-label hr.medium {
+  border-width: 2px;
+  border-color: var(--foreground);
+}
+
+.nutrition-label .calories {
+  font-size: 2.25rem;
+  font-weight: 900;
+}
+
+.nutrition-label .dv {
+  text-align: right;
+  font-size: 0.875rem;
+}
+
+/* Safe area handling for mobile */
+@supports (padding: max(0px)) {
+  .safe-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .safe-top {
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+  }
+}
+
+/* Hide scrollbar for horizontal scroll areas */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

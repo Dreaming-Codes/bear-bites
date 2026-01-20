@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bear-bites",
+  "compatibility_date": "2026-01-14",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "@tanstack/react-start/server-entry",
+  "account_id": "de6b8d71384c18545348ad14570b9c5f",
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bear-bites-db",
+      "database_id": "7e79e92d-9f8e-4b65-b397-383029bbb7af",
+    },
+  ],
+
+  "kv_namespaces": [
+    {
+      "binding": "MENU_CACHE",
+      "id": "bd576413ba25456f920879bb277bd73d",
+    },
+  ],
+}
