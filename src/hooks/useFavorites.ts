@@ -5,10 +5,19 @@ import { useLiveQuery } from '@tanstack/react-db'
 import { favoritesCollection, type Favorite } from '@/db-collections'
 import { orpc } from '@/orpc/client'
 
+// Track if we've synced for this session (module-level to persist across hook instances)
+let hasInitialSynced = false
+
 export function useFavorites() {
   const { data: session } = useSession()
   const queryClient = useQueryClient()
   const isAuthenticated = !!session?.user
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      hasInitialSynced = false
+    }
+  }, [isAuthenticated])
 
   // Local favorites from TanStack DB using useLiveQuery
   const { data: localFavorites = [] } = useLiveQuery(
@@ -57,6 +66,9 @@ export function useFavorites() {
 
       queryClient.invalidateQueries({ queryKey: ['favorites'] })
     },
+    onError: (error) => {
+      console.error('Failed to sync favorites:', error)
+    },
   })
 
   const addCloudMutation = useMutation({
@@ -73,37 +85,35 @@ export function useFavorites() {
     },
   })
 
-  // Sync local favorites to cloud when user logs in
   useEffect(() => {
     if (!isAuthenticated) return
-    if (syncMutation.isPending) return
+    if (hasInitialSynced) return
+
+    hasInitialSynced = true
 
     const unsyncedFavorites = localFavorites.filter((f: Favorite) => !f.synced)
 
-    if (unsyncedFavorites.length > 0) {
-      syncMutation.mutate({
-        favorites: unsyncedFavorites.map((f: Favorite) => ({
-          localId: f.id,
-          foodId: f.foodId,
-          foodName: f.foodName,
-          locationId: f.locationId,
-          locationName: f.locationName,
-          addedAt: f.addedAt,
-        })),
-      })
-    }
+    // Call sync - it will push unsynced AND pull cloud-only favorites
+    syncMutation.mutate({
+      favorites: unsyncedFavorites.map((f: Favorite) => ({
+        localId: f.id,
+        foodId: f.foodId,
+        foodName: f.foodName,
+        locationId: f.locationId,
+        locationName: f.locationName,
+        addedAt: f.addedAt,
+      })),
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, localFavorites])
+  }, [isAuthenticated])
 
-  // Combined favorites set (for quick lookup)
   const favoriteIds = useMemo(() => {
     const ids = new Set<string>()
-    localFavorites.forEach((f: Favorite) => ids.add(f.foodId))
-    if (cloudFavoritesQuery.data) {
-      cloudFavoritesQuery.data.forEach((f) => ids.add(f.foodId))
-    }
+    localFavorites.forEach((f: Favorite) => {
+      ids.add(f.foodId)
+    })
     return ids
-  }, [localFavorites, cloudFavoritesQuery.data])
+  }, [localFavorites])
 
   const isFavorite = useCallback(
     (foodId: string) => favoriteIds.has(foodId),
@@ -156,7 +166,6 @@ export function useFavorites() {
 
   const removeFavorite = useCallback(
     async (foodId: string) => {
-      // Find and remove from local
       const localFav = localFavorites.find((f: Favorite) => f.foodId === foodId)
       if (localFav) {
         favoritesCollection.delete(localFav.id)
@@ -190,37 +199,11 @@ export function useFavorites() {
     [isFavorite, addFavorite, removeFavorite],
   )
 
-  // Get all favorites as array
   const favorites = useMemo(() => {
-    // Merge local and cloud, preferring cloud data for synced items
-    const merged = new Map<string, Favorite>()
-
-    localFavorites.forEach((f: Favorite) => {
-      merged.set(f.foodId, f)
-    })
-
-    if (cloudFavoritesQuery.data) {
-      cloudFavoritesQuery.data.forEach((f) => {
-        const existing = merged.get(f.foodId)
-        if (!existing || !existing.synced) {
-          merged.set(f.foodId, {
-            id: f.cloudId,
-            foodId: f.foodId,
-            foodName: f.foodName,
-            locationId: f.locationId,
-            locationName: f.locationName,
-            addedAt: f.addedAt,
-            synced: true,
-            cloudId: f.cloudId,
-          })
-        }
-      })
-    }
-
-    return Array.from(merged.values()).sort(
+    return [...localFavorites].sort(
       (a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime(),
     )
-  }, [localFavorites, cloudFavoritesQuery.data])
+  }, [localFavorites])
 
   return {
     favorites,

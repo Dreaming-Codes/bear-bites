@@ -6,9 +6,10 @@ import { SmartCoercionPlugin } from '@orpc/json-schema'
 import { createFileRoute } from '@tanstack/react-router'
 import { onError } from '@orpc/server'
 import { OpenAPIReferencePlugin } from '@orpc/openapi/plugins'
+import { env } from 'cloudflare:workers'
 
-import { TodoSchema } from '@/orpc/schema'
 import router from '@/orpc/router'
+import { createAuth } from '@/lib/auth'
 
 const handler = new OpenAPIHandler(router, {
   interceptors: [
@@ -28,7 +29,6 @@ const handler = new OpenAPIHandler(router, {
           version: '1.0.0',
         },
         commonSchemas: {
-          Todo: { schema: TodoSchema },
           UndefinedError: { error: 'UndefinedError' },
         },
         security: [{ bearerAuth: [] }],
@@ -55,9 +55,20 @@ const handler = new OpenAPIHandler(router, {
 })
 
 async function handle({ request }: { request: Request }) {
+  let userId: string | undefined
+
+  try {
+    const auth = createAuth(env as Cloudflare.Env)
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    })
+    userId = session?.user?.id
+  } catch (e) {
+  }
+
   const { response } = await handler.handle(request, {
     prefix: '/api',
-    context: {},
+    context: { userId },
   })
 
   return response ?? new Response('Not Found', { status: 404 })
