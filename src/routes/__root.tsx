@@ -21,6 +21,7 @@ import { useServiceWorker } from '@/hooks/useServiceWorker'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import PWADevtools, { PWADevProvider } from '../integrations/pwa/provider'
+import { PWAInstallPrompt } from '../components/PWAInstallPrompt'
 
 import appCss from '../styles.css?url'
 
@@ -148,6 +149,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <ThemeProvider>
             {children}
             <BottomNav />
+            <PWAInstallPrompt />
           </ThemeProvider>
           <TanStackDevtools
             config={{

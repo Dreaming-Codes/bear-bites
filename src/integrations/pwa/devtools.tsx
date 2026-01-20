@@ -24,10 +24,13 @@ const INSTALL_METHODS: InstallMethod[] = [
   'none',
 ]
 
+const PROMPT_STORAGE_KEY = 'pwa-install-prompt'
+
 interface PWADevtoolsPanelProps {
   overrides: PWADevOverrides
   setOverrides: (overrides: PWADevOverrides) => void
   clearOverrides: () => void
+  forceShowPrompt: () => void
 }
 
 const PRESETS: { name: string; overrides: PWADevOverrides }[] = [
@@ -84,9 +87,18 @@ function PWADevtoolsPanel({
   overrides,
   setOverrides,
   clearOverrides,
+  forceShowPrompt,
 }: PWADevtoolsPanelProps) {
   const detected = detectPlatform()
   const hasOverrides = Object.keys(overrides).length > 0
+
+  const resetPromptState = () => {
+    try {
+      localStorage.removeItem(PROMPT_STORAGE_KEY)
+      alert('Prompt state reset. Refresh the page to see effect.')
+    } catch {
+    }
+  }
 
   const selectStyle: React.CSSProperties = {
     background: '#1a1a2e',
@@ -288,6 +300,28 @@ function PWADevtoolsPanel({
             />
             Installable
           </label>
+        </div>
+      </div>
+
+      {/* Install Prompt Controls */}
+      <div style={sectionStyle}>
+        <div style={labelStyle}>Install Prompt</div>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            style={{ ...buttonStyle, background: '#059669', flex: 1 }}
+            onClick={forceShowPrompt}
+          >
+            Force Show
+          </button>
+          <button
+            style={{ ...buttonStyle, background: '#6b7280', flex: 1 }}
+            onClick={resetPromptState}
+          >
+            Reset State
+          </button>
+        </div>
+        <div style={{ fontSize: '10px', color: '#666', marginTop: '4px' }}>
+          Reset clears visit count and dismissed flag
         </div>
       </div>
 
