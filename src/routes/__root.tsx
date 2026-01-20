@@ -20,6 +20,7 @@ import { ThemeProvider } from '@/hooks/useTheme'
 import { useServiceWorker } from '@/hooks/useServiceWorker'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
+import PWADevtools, { PWADevProvider } from '../integrations/pwa/provider'
 
 import appCss from '../styles.css?url'
 
@@ -64,7 +65,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'yes',
       },
       {
-        name: "darkreader-lock",
+        name: 'darkreader-lock',
       },
       {
         name: 'description',
@@ -143,22 +144,25 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="bg-background text-foreground">
-        <ThemeProvider>
-          {children}
-          <BottomNav />
-        </ThemeProvider>
-        <TanStackDevtools
-          config={{
-            position: 'bottom-right',
-          }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-            TanStackQueryDevtools,
-          ]}
-        />
+        <PWADevProvider>
+          <ThemeProvider>
+            {children}
+            <BottomNav />
+          </ThemeProvider>
+          <TanStackDevtools
+            config={{
+              position: 'bottom-right',
+            }}
+            plugins={[
+              {
+                name: 'Tanstack Router',
+                render: <TanStackRouterDevtoolsPanel />,
+              },
+              TanStackQueryDevtools,
+              PWADevtools,
+            ]}
+          />
+        </PWADevProvider>
         <Scripts />
       </body>
     </html>

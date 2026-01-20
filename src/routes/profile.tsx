@@ -7,6 +7,9 @@ import {
   Monitor,
   Download,
   CheckCircle,
+  Share,
+  MoreVertical,
+  Plus,
 } from 'lucide-react'
 import { PageWrapper, Container, GlassCard } from '@/components/bear-bites'
 import { useSession, signIn, signOut } from '@/lib/auth-client'
@@ -81,7 +84,13 @@ function ThemeSelector({
 function ProfilePage() {
   const { data: session, isPending } = useSession()
   const { theme, setTheme } = useTheme()
-  const { isInstallable, isInstalled, promptInstall } = usePWAInstall()
+  const {
+    isInstallable,
+    isInstalled,
+    promptInstall,
+    installMethod,
+    showInstallSection,
+  } = usePWAInstall()
 
   return (
     <PageWrapper>
@@ -162,28 +171,171 @@ function ProfilePage() {
         )}
 
         {/* Install App Section */}
-        {(isInstallable || isInstalled) && (
+        {showInstallSection && (
           <GlassCard className="mt-4">
             <h3 className="font-semibold mb-3">Install App</h3>
             {isInstalled ? (
-              <div className="flex items-center gap-3 text-primary">
-                <CheckCircle size={20} />
-                <span>Bear Bites is installed!</span>
-              </div>
-            ) : (
-              <button
-                onClick={promptInstall}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
-              >
-                <Download size={18} />
-                <span>Install Bear Bites</span>
-              </button>
-            )}
-            <p className="text-sm text-muted-foreground mt-2">
-              {isInstalled
-                ? 'You can access Bear Bites from your home screen.'
-                : 'Install for quick access and offline support.'}
-            </p>
+              <>
+                <div className="flex items-center gap-3 text-primary">
+                  <CheckCircle size={20} />
+                  <span>Bear Bites is installed!</span>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  You can access Bear Bites from your home screen.
+                </p>
+              </>
+            ) : isInstallable ? (
+              <>
+                <button
+                  onClick={promptInstall}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                >
+                  <Download size={18} />
+                  <span>Install Bear Bites</span>
+                </button>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Install for quick access and offline support.
+                </p>
+              </>
+            ) : installMethod === 'ios-safari' ? (
+              <>
+                <div className="space-y-3 text-sm">
+                  <p className="text-muted-foreground">
+                    To install Bear Bites on your device:
+                  </p>
+                  <ol className="space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium shrink-0">
+                        1
+                      </span>
+                      <span>
+                        Tap the{' '}
+                        <Share
+                          size={14}
+                          className="inline-block align-text-bottom mx-0.5"
+                        />{' '}
+                        <strong>Share</strong> button in the toolbar
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium shrink-0">
+                        2
+                      </span>
+                      <span>
+                        Scroll down and tap{' '}
+                        <Plus
+                          size={14}
+                          className="inline-block align-text-bottom mx-0.5"
+                        />{' '}
+                        <strong>Add to Home Screen</strong>
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium shrink-0">
+                        3
+                      </span>
+                      <span>
+                        Tap <strong>Add</strong> to confirm
+                      </span>
+                    </li>
+                  </ol>
+                </div>
+              </>
+            ) : installMethod === 'ios-other' ? (
+              <>
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-start gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                    <span className="text-amber-500 shrink-0">⚠️</span>
+                    <p className="text-amber-700 dark:text-amber-400">
+                      Installing apps on iOS is only supported in Safari.
+                    </p>
+                  </div>
+                  <p className="text-muted-foreground">
+                    To install Bear Bites:
+                  </p>
+                  <ol className="space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium shrink-0">
+                        1
+                      </span>
+                      <span>
+                        Open this page in <strong>Safari</strong>
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium shrink-0">
+                        2
+                      </span>
+                      <span>
+                        Tap the{' '}
+                        <Share
+                          size={14}
+                          className="inline-block align-text-bottom mx-0.5"
+                        />{' '}
+                        <strong>Share</strong> button
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium shrink-0">
+                        3
+                      </span>
+                      <span>
+                        Tap{' '}
+                        <Plus
+                          size={14}
+                          className="inline-block align-text-bottom mx-0.5"
+                        />{' '}
+                        <strong>Add to Home Screen</strong>
+                      </span>
+                    </li>
+                  </ol>
+                </div>
+              </>
+            ) : installMethod === 'samsung' ? (
+              <>
+                <div className="space-y-3 text-sm">
+                  <p className="text-muted-foreground">
+                    To install Bear Bites on your device:
+                  </p>
+                  <ol className="space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium shrink-0">
+                        1
+                      </span>
+                      <span>
+                        Tap the{' '}
+                        <MoreVertical
+                          size={14}
+                          className="inline-block align-text-bottom mx-0.5"
+                        />{' '}
+                        <strong>Menu</strong> button (three dots)
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium shrink-0">
+                        2
+                      </span>
+                      <span>
+                        Tap{' '}
+                        <Plus
+                          size={14}
+                          className="inline-block align-text-bottom mx-0.5"
+                        />{' '}
+                        <strong>Add page to</strong>
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium shrink-0">
+                        3
+                      </span>
+                      <span>
+                        Select <strong>Home screen</strong>
+                      </span>
+                    </li>
+                  </ol>
+                </div>
+              </>
+            ) : null}
           </GlassCard>
         )}
 
