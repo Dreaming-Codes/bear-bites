@@ -120,7 +120,10 @@ export function PageWrapper({ children, className }: PageWrapperProps) {
   return (
     <main
       className={cn('min-h-screen', className)}
-      style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}
+      style={{
+        paddingTop: 'env(safe-area-inset-top, 0px)',
+        paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))',
+      }}
     >
       {children}
     </main>
