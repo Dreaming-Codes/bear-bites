@@ -183,8 +183,6 @@ export function usePWAInstall() {
     checkInstalled()
 
     const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
-      // Prevent the mini-infobar from appearing on mobile
-      e.preventDefault()
       setDeferredPrompt(e)
       setIsInstallableReal(true)
         setInstallMethodReal('native')
