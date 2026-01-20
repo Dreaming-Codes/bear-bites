@@ -14,7 +14,7 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-30">
-      <div className="glass border-t border-white/10 pb-[env(safe-area-inset-bottom)]">
+      <div className="glass backdrop-blur-md border-t border-white/10 pb-[env(safe-area-inset-bottom)]">
         <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
           {navItems.map((item) => {
             const isActive =

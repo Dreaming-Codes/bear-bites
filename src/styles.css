@@ -175,19 +175,62 @@ code {
   }
 }
 
-/* Glassmorphism styles - using regular CSS since Tailwind v4 handles @layer differently */
+/* Gradient background for glassmorphism effect */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  background:
+    radial-gradient(
+      ellipse at 20% 20%,
+      rgba(0, 61, 165, 0.15) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 80% 80%,
+      rgba(255, 184, 28, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 50% 50%,
+      rgba(0, 61, 165, 0.05) 0%,
+      transparent 70%
+    );
+  pointer-events: none;
+}
+
+.dark body::before {
+  background:
+    radial-gradient(
+      ellipse at 20% 20%,
+      rgba(0, 61, 165, 0.25) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 80% 80%,
+      rgba(255, 184, 28, 0.15) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 50% 50%,
+      rgba(0, 61, 165, 0.1) 0%,
+      transparent 70%
+    );
+}
+
+/* Glassmorphism styles */
 .glass {
   background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
 }
 
 .glass-card {
   background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
   border-radius: var(--radius);
@@ -196,8 +239,6 @@ code {
 
 .glass-button {
   background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
   border-radius: 0.5rem;
