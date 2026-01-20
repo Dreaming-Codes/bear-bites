@@ -182,10 +182,16 @@ export function parseLabelPage(html: string, itemId: string): FoodDetail {
 
   // The nutrition label uses specific CSS classes
 
-  // Serving size - look for "Serving Size" text
   const servingSizeMatch =
-    html.match(/Serving Size[^<]*<\/span>\s*([^<]+)/i) ||
-    html.match(/<div class="nf-right-value">([^<]+)<\/div>/i)
+    html.match(
+      /Serving size<\/h4>\s*<\/div>\s*<div class="nf-right-value">([^<]+)<\/div>/i,
+    ) ||
+    html.match(
+      /Serving size[^<]*<\/h4>\s*<\/div>\s*<div[^>]*>([^<]+)<\/div>/i,
+    ) ||
+    html.match(
+      /<div class="nf-row nf-serving">[\s\S]*?<div class="nf-right-value">([^<]+)<\/div>/i,
+    )
   const servingSize = servingSizeMatch
     ? servingSizeMatch[1].trim()
     : '1 serving'
@@ -197,27 +203,56 @@ export function parseLabelPage(html: string, itemId: string): FoodDetail {
   const calories = caloriesMatch ? parseInt(caloriesMatch[1]) : 0
 
   // Helper to extract nutrient values
+  // The HTML structure is: <div class="nf-row"><div><h4>Name</h4> Value</div><div class="nf-right-value">DV%</div></div>
   const extractNutrient = (
     name: string,
     unit: string,
   ): { value: number; dv: number } => {
-    // Pattern: nutrient name followed by value and optional DV
-    const pattern = new RegExp(
-      `${name}[^\\d]*(\\d+(?:\\.\\d+)?)\\s*${unit}[^%]*(\\d+(?:\\.\\d+)?)?\\s*%?`,
+    // Match the nf-row containing this nutrient to extract both value and DV
+    const rowPattern = new RegExp(
+      `<div class="nf-row[^"]*">[\\s\\S]*?${name}[\\s\\S]*?</div>\\s*</div>`,
       'i',
     )
-    const match = html.match(pattern)
-    return {
-      value: match ? parseFloat(match[1]) : 0,
-      dv: match && match[2] ? parseFloat(match[2]) : 0,
+    const rowMatch = html.match(rowPattern)
+
+    let value = 0
+    let dv = 0
+
+    if (rowMatch) {
+      const rowHtml = rowMatch[0]
+      // Extract the value (number followed by unit)
+      const valuePattern = new RegExp(`(\\d+(?:\\.\\d+)?)\\s*${unit}`, 'i')
+      const valueMatch = rowHtml.match(valuePattern)
+      if (valueMatch) {
+        value = parseFloat(valueMatch[1])
+      }
+      // Extract the daily value percentage
+      const dvMatch =
+        rowHtml.match(/class="nf-right-value"[^>]*>(\d+(?:\.\d+)?)%/i) ||
+        rowHtml.match(/class="nf-right"[^>]*>(\d+(?:\.\d+)?)%/i)
+      if (dvMatch) {
+        dv = parseFloat(dvMatch[1])
+      }
+    } else {
+      // Fallback: just try to find the value anywhere
+      const valuePattern = new RegExp(
+        `${name}[^\\d]*(\\d+(?:\\.\\d+)?)\\s*${unit}`,
+        'i',
+      )
+      const valueMatch = html.match(valuePattern)
+      if (valueMatch) {
+        value = parseFloat(valueMatch[1])
+      }
     }
+
+    return { value, dv }
   }
 
   const totalFat = extractNutrient('Total Fat', 'g')
   const satFat = extractNutrient('Saturated Fat', 'g')
   const transFatMatch =
-    html.match(/Trans\s*<\/em>\s*Fat[^\\d]*(\\d+(?:\\.\\d+)?)g/i) ||
-    html.match(/Trans Fat[^\\d]*(\\d+(?:\\.\\d+)?)g/i)
+    html.match(/Trans\s*<\/em>\s*Fat[^\d]*(\d+(?:\.\d+)?)g/i) ||
+    html.match(/Trans Fat[^\d]*(\d+(?:\.\d+)?)g/i)
   const transFat = transFatMatch ? parseFloat(transFatMatch[1]) : 0
 
   const cholesterol = extractNutrient('Cholesterol', 'mg')
@@ -225,12 +260,12 @@ export function parseLabelPage(html: string, itemId: string): FoodDetail {
   const totalCarbs = extractNutrient('Total Carbohydrate', 'g')
   const fiber = extractNutrient('Dietary Fiber', 'g')
 
-  const sugarsMatch = html.match(/Total Sugars[^\\d]*(\\d+(?:\\.\\d+)?)g/i)
+  const sugarsMatch = html.match(/Total Sugars[^\d]*(\d+(?:\.\d+)?)g/i)
   const totalSugars = sugarsMatch ? parseFloat(sugarsMatch[1]) : 0
 
   const addedSugars = extractNutrient('Added Sugars', 'g')
 
-  const proteinMatch = html.match(/Protein[^\\d]*(\\d+(?:\\.\\d+)?)g/i)
+  const proteinMatch = html.match(/Protein[^\d]*(\d+(?:\.\d+)?)g/i)
   const protein = proteinMatch ? parseFloat(proteinMatch[1]) : 0
 
   const vitaminD = extractNutrient('Vitamin D', 'mcg')
