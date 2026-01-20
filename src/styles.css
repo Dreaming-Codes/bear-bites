@@ -55,10 +55,10 @@ code {
   --radius: 0.75rem;
 
   /* Glassmorphism tokens */
-  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-bg: rgba(255, 255, 255, 0.8);
   --glass-border: rgba(255, 255, 255, 0.3);
   --glass-shadow: 0 8px 32px rgba(0, 61, 165, 0.1);
-  --glass-blur: 12px;
+  --glass-blur: 20px;
 
   /* Dietary tag colors */
   --vegan-bg: oklch(0.85 0.15 145);
@@ -101,9 +101,10 @@ code {
   --chart-5: oklch(0.65 0.15 300);
 
   /* Glassmorphism tokens - dark mode */
-  --glass-bg: rgba(30, 40, 60, 0.7);
+  --glass-bg: rgba(20, 25, 40, 0.85);
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --glass-blur: 20px;
 
   /* Dietary tag colors - dark mode */
   --vegan-bg: oklch(0.35 0.12 145);
