@@ -17,6 +17,7 @@ import {
   GlassButton,
 } from '@/components/bear-bites'
 import { ThemeProvider } from '@/hooks/useTheme'
+import { useServiceWorker } from '@/hooks/useServiceWorker'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 
@@ -47,6 +48,27 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'yes',
       },
       {
+        name: 'apple-mobile-web-app-status-bar-style',
+        content: 'black-translucent',
+      },
+      {
+        name: 'apple-mobile-web-app-title',
+        content: 'Bear Bites',
+      },
+      {
+        name: 'application-name',
+        content: 'Bear Bites',
+      },
+      {
+        name: 'mobile-web-app-capable',
+        content: 'yes',
+      },
+      {
+        name: 'description',
+        content:
+          'Browse UCR dining hall menus, filter by dietary preferences, and save your favorite foods.',
+      },
+      {
         title: 'Bear Bites - UCR Dining Menu',
       },
     ],
@@ -54,6 +76,26 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       {
         rel: 'stylesheet',
         href: appCss,
+      },
+      {
+        rel: 'manifest',
+        href: '/manifest.json',
+      },
+      {
+        rel: 'icon',
+        type: 'image/png',
+        sizes: '512x512',
+        href: '/icons/icon-512x512.png',
+      },
+      {
+        rel: 'icon',
+        type: 'image/png',
+        sizes: '192x192',
+        href: '/icons/icon-192x192.png',
+      },
+      {
+        rel: 'apple-touch-icon',
+        href: '/apple-touch-icon.png',
       },
     ],
   }),
@@ -90,6 +132,8 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  useServiceWorker()
+
   return (
     <html lang="en" className="dark">
       <head>
