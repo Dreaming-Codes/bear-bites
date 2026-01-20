@@ -31,6 +31,7 @@ const searchSchema = z.object({
   date: z.string().optional(),
   location: z.string().optional(),
   meal: z.enum(['breakfast', 'lunch', 'dinner', 'brunch']).optional(),
+  view: z.enum(['station', 'all']).optional(),
 })
 
 export const Route = createFileRoute('/')({
@@ -88,8 +89,8 @@ function HomePage() {
   const selectedLocation =
     LOCATIONS.find((l) => l.id === search.location) || LOCATIONS[1]
   const selectedMeal: Meal = search.meal || getCurrentMeal()
+  const groupByStation = search.view !== 'all'
 
-  const [groupByStation, setGroupByStation] = useState(true)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
 
   const { filters, setFilters } = usePersistedFilters()
@@ -97,7 +98,12 @@ function HomePage() {
   const { favoriteIds, toggleFavorite } = useFavorites()
 
     const updateSearch = useCallback(
-    (updates: { date?: string; location?: string; meal?: Meal }) => {
+    (updates: {
+      date?: string
+      location?: string
+      meal?: Meal
+      view?: 'station' | 'all'
+    }) => {
       navigate({
         to: '/',
         search: (prev) => ({
@@ -352,14 +358,14 @@ function HomePage() {
             <GlassButton
               variant={groupByStation ? 'primary' : 'ghost'}
               size="sm"
-              onClick={() => setGroupByStation(true)}
+              onClick={() => updateSearch({ view: 'station' })}
             >
               By Station
             </GlassButton>
             <GlassButton
               variant={!groupByStation ? 'primary' : 'ghost'}
               size="sm"
-              onClick={() => setGroupByStation(false)}
+              onClick={() => updateSearch({ view: 'all' })}
             >
               All Items
             </GlassButton>
@@ -428,6 +434,7 @@ function HomePage() {
                 locationId={selectedLocation.id}
                 favorites={favoriteIds}
                 onToggleFavorite={handleToggleFavorite}
+                showStationInCards={true}
               />
             )}
             {/* Regular station groups */}

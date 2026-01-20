@@ -22,6 +22,7 @@ const searchSchema = z.object({
   date: z.string().optional(),
   locationId: z.string().optional(),
   labelUrl: z.string(),
+  foodName: z.string().optional(),
 })
 
 export const Route = createFileRoute('/food/$itemId')({
@@ -188,7 +189,7 @@ function NutritionLabel({ nutrition }: { nutrition: Nutrition }) {
 
 function FoodDetailPage() {
   const { itemId } = Route.useParams()
-  const { labelUrl, locationId } = Route.useSearch()
+  const { labelUrl, locationId, foodName } = Route.useSearch()
   const router = useRouter()
   const { isFavorite, toggleFavorite } = useFavorites()
 
@@ -208,13 +209,15 @@ function FoodDetailPage() {
   )
 
   const food = foodQuery.data
+  // Use foodName from search params if available, otherwise fall back to scraped name
+  const displayName = foodName || food?.name || 'Unknown'
   const isItemFavorite = food ? isFavorite(food.id) : false
 
   const handleToggleFavorite = () => {
     if (!food) return
     toggleFavorite({
       foodId: food.id,
-      foodName: food.name,
+      foodName: displayName,
       locationId: location.id,
       locationName: location.name,
       labelUrl,
@@ -290,7 +293,7 @@ function FoodDetailPage() {
           <div className="space-y-6">
             {/* Food Name & Tags */}
             <div>
-              <h1 className="text-2xl font-bold mb-3">{food.name}</h1>
+              <h1 className="text-2xl font-bold mb-3">{displayName}</h1>
               <DietaryTags tags={food.dietaryTags} className="mb-2" />
               {food.allergens.length > 0 && (
                 <AllergenList allergens={food.allergens} />
