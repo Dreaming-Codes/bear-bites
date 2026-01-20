@@ -2,6 +2,7 @@ const APP_VERSION = '__APP_VERSION__'
 const CACHE_NAME = `bear-bites-${APP_VERSION}`
 const STATIC_CACHE_NAME = `bear-bites-static-${APP_VERSION}`
 const DYNAMIC_CACHE_NAME = `bear-bites-dynamic-${APP_VERSION}`
+const MENU_CACHE_NAME = `bear-bites-menu-${APP_VERSION}`
 
 const STATIC_ASSETS = [
   '/',
@@ -29,7 +30,8 @@ self.addEventListener('activate', (event) => {
             return (
               name.startsWith('bear-bites-') &&
               name !== STATIC_CACHE_NAME &&
-              name !== DYNAMIC_CACHE_NAME
+              name !== DYNAMIC_CACHE_NAME &&
+              name !== MENU_CACHE_NAME
             )
           })
           .map((name) => {
@@ -50,7 +52,12 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Skip API requests - always go to network
+  // Handle menu API requests (oRPC endpoints) - cache for offline support
+  if (url.pathname.startsWith('/api/rpc')) {
+    event.respondWith(handleMenuApiRequest(request))
+    return
+  }
+
   if (url.pathname.startsWith('/api/')) {
     return
   }
@@ -129,6 +136,49 @@ self.addEventListener('fetch', (event) => {
       }),
   )
 })
+
+async function handleMenuApiRequest(request) {
+  const cache = await caches.open(MENU_CACHE_NAME)
+
+  try {
+    const networkResponse = await fetch(request)
+
+    // Only cache successful responses
+    if (networkResponse.ok) {
+      // Clone the response before caching (response can only be used once)
+      const responseToCache = networkResponse.clone()
+
+      // Store with timestamp for potential future cache invalidation
+      cache.put(request, responseToCache)
+      console.log('[SW] Cached menu API response:', request.url)
+    }
+
+    return networkResponse
+  } catch (error) {
+    // Network failed, try cache
+    console.log('[SW] Network failed, trying cache for:', request.url)
+    const cachedResponse = await cache.match(request)
+
+    if (cachedResponse) {
+      console.log('[SW] Serving cached menu data:', request.url)
+      return cachedResponse
+    }
+
+    // No cache available, return error response
+    console.log('[SW] No cached data available for:', request.url)
+    return new Response(
+      JSON.stringify({
+        error: 'You are offline and this menu has not been cached yet.',
+        offline: true,
+      }),
+      {
+        status: 503,
+        statusText: 'Service Unavailable',
+        headers: { 'Content-Type': 'application/json' },
+      },
+    )
+  }
+}
 
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
