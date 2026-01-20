@@ -13,6 +13,7 @@ import { useSession, signIn, signOut } from '@/lib/auth-client'
 import { useTheme } from '@/hooks/useTheme'
 import { usePWAInstall } from '@/hooks/usePWAInstall'
 import { cn } from '@/lib/utils'
+import { APP_VERSION } from '@/lib/version'
 
 export const Route = createFileRoute('/profile')({ component: ProfilePage })
 
@@ -188,7 +189,7 @@ function ProfilePage() {
 
         {/* App Info */}
         <div className="text-center text-sm text-muted-foreground mt-8">
-          <p>Bear Bites v1.0.0</p>
+          <p>Bear Bites v{APP_VERSION}</p>
           <p>UCR Dining Menu</p>
           <p className="mt-2">
             Made with ❤️ by{' '}
