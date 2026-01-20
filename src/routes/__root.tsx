@@ -8,6 +8,7 @@ import {
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { Home } from 'lucide-react'
+import { useEffect } from 'react'
 
 import {
   BottomNav,
@@ -138,6 +139,11 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   useServiceWorker()
+
+  // Fix iOS Safari stuck :active state - adding touchstart listener enables proper touch handling
+  useEffect(() => {
+    document.addEventListener('touchstart', () => {}, { passive: true })
+  }, [])
 
   return (
     <html lang="en" className="dark">
