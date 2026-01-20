@@ -363,7 +363,7 @@ function HomePage() {
                   'flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all',
                   isSelected
                     ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground',
+                    : 'bg-transparent text-muted-foreground hover:text-foreground active:bg-transparent',
                   !isAvailable &&
                     !menuQuery.isLoading &&
                     'opacity-40 cursor-not-allowed',
