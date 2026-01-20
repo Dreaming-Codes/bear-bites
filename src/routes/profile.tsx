@@ -1,8 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { User, LogOut, Moon, Sun, Monitor } from 'lucide-react'
+import {
+  User,
+  LogOut,
+  Moon,
+  Sun,
+  Monitor,
+  Download,
+  CheckCircle,
+} from 'lucide-react'
 import { PageWrapper, Container, GlassCard } from '@/components/bear-bites'
 import { useSession, signIn, signOut } from '@/lib/auth-client'
 import { useTheme } from '@/hooks/useTheme'
+import { usePWAInstall } from '@/hooks/usePWAInstall'
 import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/profile')({ component: ProfilePage })
@@ -71,6 +80,7 @@ function ThemeSelector({
 function ProfilePage() {
   const { data: session, isPending } = useSession()
   const { theme, setTheme } = useTheme()
+  const { isInstallable, isInstalled, promptInstall } = usePWAInstall()
 
   return (
     <PageWrapper>
@@ -147,6 +157,32 @@ function ProfilePage() {
             <SettingRow icon={Moon} label="Theme">
               <ThemeSelector value={theme} onChange={setTheme} />
             </SettingRow>
+          </GlassCard>
+        )}
+
+        {/* Install App Section */}
+        {(isInstallable || isInstalled) && (
+          <GlassCard className="mt-4">
+            <h3 className="font-semibold mb-3">Install App</h3>
+            {isInstalled ? (
+              <div className="flex items-center gap-3 text-primary">
+                <CheckCircle size={20} />
+                <span>Bear Bites is installed!</span>
+              </div>
+            ) : (
+              <button
+                onClick={promptInstall}
+                className="w-full flex items-center justify-center gap-2 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+              >
+                <Download size={18} />
+                <span>Install Bear Bites</span>
+              </button>
+            )}
+            <p className="text-sm text-muted-foreground mt-2">
+              {isInstalled
+                ? 'You can access Bear Bites from your home screen.'
+                : 'Install for quick access and offline support.'}
+            </p>
           </GlassCard>
         )}
 
