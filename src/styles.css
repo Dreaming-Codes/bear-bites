@@ -13,6 +13,22 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Fix iOS PWA tap highlight persistence */
+button,
+[role='button'] {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* Ensure hover states don't persist on touch devices */
+@media (hover: none) {
+  button:hover,
+  [role='button']:hover {
+    background-color: inherit;
+    color: inherit;
+  }
+}
+
 code {
   font-family:
     source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
