@@ -18,7 +18,7 @@ export function GlassCard({
     <div
       onClick={onClick}
       className={cn(
-        'glass-card',
+        'glass-card backdrop-blur-md',
         hoverable &&
           'cursor-pointer hover:scale-[1.02] transition-transform duration-200',
         onClick && 'cursor-pointer',
@@ -50,7 +50,7 @@ export function GlassButton({
   type = 'button',
 }: GlassButtonProps) {
   const variants = {
-    default: 'glass-button',
+    default: 'glass-button backdrop-blur-md',
     primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
     secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/90',
     ghost: 'hover:bg-muted',
@@ -119,7 +119,7 @@ interface PageWrapperProps {
 export function PageWrapper({ children, className }: PageWrapperProps) {
   return (
     <main
-      className={cn('min-h-screen bg-background', className)}
+      className={cn('min-h-screen', className)}
       style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}
     >
       {children}
