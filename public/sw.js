@@ -54,6 +54,10 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
+  if (url.origin !== self.location.origin) {
+    return
+  }
+
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
@@ -109,7 +113,18 @@ self.addEventListener('fetch', (event) => {
         return response
       })
       .catch(() => {
-        return caches.match(request)
+        return caches.match(request).then((cachedResponse) => {
+          // Return cached response or a proper error response
+          if (cachedResponse) {
+            return cachedResponse
+          }
+          // Return a proper Response object instead of undefined
+          return new Response('Resource not available offline', {
+            status: 503,
+            statusText: 'Service Unavailable',
+            headers: { 'Content-Type': 'text/plain' },
+          })
+        })
       }),
   )
 })
