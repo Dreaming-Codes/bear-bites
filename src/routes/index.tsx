@@ -25,7 +25,7 @@ import { FoodGrid, StationGroup } from '@/components/bear-bites/FoodCard'
 import { cn } from '@/lib/utils'
 import { useFavorites } from '@/hooks/useFavorites'
 import { usePersistedFilters } from '@/hooks/usePersistedFilters'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 const searchSchema = z.object({
   date: z.string().optional(),
@@ -39,17 +39,24 @@ export const Route = createFileRoute('/')({
   validateSearch: searchSchema,
 })
 
+function getRiversideDate(): Date {
+  return new Date(
+    new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }),
+  )
+}
+
 function formatDate(date: Date): string {
-  return date.toISOString().split('T')[0]
+  // en-CA locale outputs YYYY-MM-DD format which is what we need for API/URL params
+  return date.toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' })
 }
 
 function parseDate(dateStr: string): Date {
   const date = new Date(dateStr + 'T12:00:00')
-  return isNaN(date.getTime()) ? new Date() : date
+  return isNaN(date.getTime()) ? getRiversideDate() : date
 }
 
 function formatDisplayDate(date: Date): string {
-  const today = new Date()
+  const today = getRiversideDate()
   const tomorrow = new Date(today)
   tomorrow.setDate(tomorrow.getDate() + 1)
   const yesterday = new Date(today)
@@ -64,13 +71,12 @@ function formatDisplayDate(date: Date): string {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
+    timeZone: 'America/Los_Angeles',
   })
 }
 
 function getCurrentMeal(): Meal {
-  // Return a stable default for SSR, will be corrected on client
-  if (typeof window === 'undefined') return 'breakfast'
-  const hour = new Date().getHours()
+  const hour = getRiversideDate().getHours()
   if (hour < 10) return 'breakfast'
   if (hour < 14) return 'lunch'
   return 'dinner'
@@ -86,16 +92,10 @@ function HomePage() {
   const navigate = useNavigate()
   const search = Route.useSearch()
 
-    const [isHydrated, setIsHydrated] = useState(false)
-  useEffect(() => {
-    setIsHydrated(true)
-  }, [])
-
-  const selectedDate = search.date ? parseDate(search.date) : new Date()
+  const selectedDate = search.date ? parseDate(search.date) : getRiversideDate()
   const selectedLocation =
     LOCATIONS.find((l) => l.id === search.location) || LOCATIONS[1]
-  const selectedMeal: Meal =
-    search.meal || (isHydrated ? getCurrentMeal() : 'breakfast')
+  const selectedMeal: Meal = search.meal || getCurrentMeal()
   const groupByStation = search.view !== 'all'
 
   const [isFilterOpen, setIsFilterOpen] = useState(false)
@@ -104,7 +104,7 @@ function HomePage() {
 
   const { favoriteIds, toggleFavorite } = useFavorites()
 
-    const updateSearch = useCallback(
+  const updateSearch = useCallback(
     (updates: {
       date?: string
       location?: string
@@ -176,7 +176,7 @@ function HomePage() {
     if (!menuQuery.data?.meals) return []
     let items = menuQuery.data.meals[selectedMeal] || []
 
-      if (hasActiveFilters) {
+    if (hasActiveFilters) {
       items = items.filter((item) => {
         // Check dietary tags
         if (filters.vegan && !item.dietaryTags.includes('vegan')) {
@@ -269,7 +269,7 @@ function HomePage() {
     })
   }
 
-  const isToday = formatDate(selectedDate) === formatDate(new Date())
+  const isToday = formatDate(selectedDate) === formatDate(getRiversideDate())
 
   const activeFilterCount =
     (filters.vegan ? 1 : 0) +
