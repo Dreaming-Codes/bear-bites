@@ -102,39 +102,7 @@ self.addEventListener('fetch', (event) => {
             console.log('[SW] Serving cached root as fallback')
             return rootResponse
           }
-          // No cache available
-          console.log('[SW] No cached navigation available')
-          return new Response(
-            `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Offline - Bear Bites</title>
-  <style>
-    body { font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #0f172a; color: #f8fafc; }
-    .container { text-align: center; padding: 2rem; }
-    h1 { font-size: 3rem; margin-bottom: 0.5rem; }
-    p { color: #94a3b8; margin-bottom: 1.5rem; }
-    button { background: #3b82f6; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-size: 1rem; cursor: pointer; }
-    button:hover { background: #2563eb; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>🐻</h1>
-    <h2>You're Offline</h2>
-    <p>Please connect to the internet and open the app at least once to enable offline mode.</p>
-    <button onclick="location.reload()">Try Again</button>
-  </div>
-</body>
-</html>`,
-            {
-              status: 503,
-              statusText: 'Service Unavailable',
-              headers: { 'Content-Type': 'text/html' },
-            },
-          )
+          throw new Error('No cached navigation available')
         }),
     )
     return
