@@ -189,6 +189,16 @@ function ProfilePage() {
               DreamingCodes
             </a>
           </p>
+          <p className="mt-1">
+            <a
+              href="https://github.com/Dreaming-Codes/bear-bites"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              GitHub
+            </a>
+          </p>
         </div>
       </Container>
     </PageWrapper>
