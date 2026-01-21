@@ -1,11 +1,4 @@
-import {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-  createContext,
-  useContext,
-} from 'react'
+import { useCallback, useMemo, createContext, useContext } from 'react'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -56,6 +49,15 @@ interface PWADevContextValue {
   detectedPlatformInfo: PlatformInfo
   forceShowPrompt: () => void
   subscribeToForcePrompt: (callback: () => void) => () => void
+  // Global PWA install state (captured at app startup)
+  deferredPrompt: BeforeInstallPromptEvent | null
+  setDeferredPrompt: (prompt: BeforeInstallPromptEvent | null) => void
+  isInstallableGlobal: boolean
+  setIsInstallableGlobal: (value: boolean) => void
+  installMethodGlobal: InstallMethod
+  setInstallMethodGlobal: (value: InstallMethod) => void
+  isInstalledGlobal: boolean
+  setIsInstalledGlobal: (value: boolean) => void
 }
 
 const PWADevContext = createContext<PWADevContextValue | null>(null)
@@ -151,65 +153,26 @@ export function detectPlatform(): PlatformInfo {
 }
 
 export function usePWAInstall() {
-  const [deferredPrompt, setDeferredPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null)
-  const [isInstalledReal, setIsInstalledReal] = useState(false)
-  const [isInstallableReal, setIsInstallableReal] = useState(false)
-
   const detectedPlatformInfo = useMemo(() => detectPlatform(), [])
-  const [installMethodReal, setInstallMethodReal] = useState<InstallMethod>(
-    detectedPlatformInfo.installMethod,
-  )
 
   const devContext = usePWADevContext()
   const overrides = devContext?.overrides
 
-  const isInstalled = overrides?.isInstalled ?? isInstalledReal
-  const isInstallable = overrides?.isInstallable ?? isInstallableReal
-  const installMethod = overrides?.installMethod ?? installMethodReal
+  // Use global state from context (captured at app startup) with fallbacks for SSR
+  const deferredPrompt = devContext?.deferredPrompt ?? null
+  const setDeferredPrompt = devContext?.setDeferredPrompt ?? (() => {})
+  const isInstallableGlobal = devContext?.isInstallableGlobal ?? false
+  const setIsInstallableGlobal =
+    devContext?.setIsInstallableGlobal ?? (() => {})
+  const installMethodGlobal =
+    devContext?.installMethodGlobal ?? detectedPlatformInfo.installMethod
+  const isInstalledGlobal = devContext?.isInstalledGlobal ?? false
+
+  const isInstalled = overrides?.isInstalled ?? isInstalledGlobal
+  const isInstallable = overrides?.isInstallable ?? isInstallableGlobal
+  const installMethod = overrides?.installMethod ?? installMethodGlobal
   const platform = overrides?.platform ?? detectedPlatformInfo.platform
   const browser = overrides?.browser ?? detectedPlatformInfo.browser
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const checkInstalled = () => {
-      const isStandalone =
-        window.matchMedia('(display-mode: standalone)').matches ||
-        (window.navigator as any).standalone === true
-      setIsInstalledReal(isStandalone)
-    }
-
-    checkInstalled()
-
-    const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
-      setDeferredPrompt(e)
-      setIsInstallableReal(true)
-        setInstallMethodReal('native')
-    }
-
-    const handleAppInstalled = () => {
-      setIsInstalledReal(true)
-      setIsInstallableReal(false)
-      setDeferredPrompt(null)
-    }
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-    window.addEventListener('appinstalled', handleAppInstalled)
-
-    // Also check on display mode change
-    const mediaQuery = window.matchMedia('(display-mode: standalone)')
-    mediaQuery.addEventListener('change', checkInstalled)
-
-    return () => {
-      window.removeEventListener(
-        'beforeinstallprompt',
-        handleBeforeInstallPrompt,
-      )
-      window.removeEventListener('appinstalled', handleAppInstalled)
-      mediaQuery.removeEventListener('change', checkInstalled)
-    }
-  }, [])
 
   const promptInstall = useCallback(async () => {
     if (!deferredPrompt) {
@@ -222,10 +185,10 @@ export function usePWAInstall() {
     const { outcome } = await deferredPrompt.userChoice
 
     setDeferredPrompt(null)
-    setIsInstallableReal(false)
+    setIsInstallableGlobal(false)
 
     return outcome === 'accepted'
-  }, [deferredPrompt])
+  }, [deferredPrompt, setDeferredPrompt, setIsInstallableGlobal])
 
   // Show if: installed, native prompt available, or platform supports manual install
   const showInstallSection =

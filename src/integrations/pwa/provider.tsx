@@ -1,10 +1,16 @@
-import { useState, useRef, useCallback, type ReactNode } from 'react'
+import { useState, useRef, useCallback, useEffect, type ReactNode } from 'react'
 import {
   PWADevContext,
   type PWADevOverrides,
+  type InstallMethod,
   detectPlatform,
 } from '@/hooks/usePWAInstall'
 import { PWADevtoolsPanel } from './devtools'
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+}
 
 interface PWADevProviderProps {
   children: ReactNode
@@ -14,7 +20,62 @@ export function PWADevProvider({ children }: PWADevProviderProps) {
   const [overrides, setOverridesState] = useState<PWADevOverrides>({})
   const detectedPlatformInfo = detectPlatform()
 
+  // Global PWA install state - captured once at app startup
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null)
+  const [isInstallableGlobal, setIsInstallableGlobal] = useState(false)
+  const [installMethodGlobal, setInstallMethodGlobal] = useState<InstallMethod>(
+    detectedPlatformInfo.installMethod,
+  )
+  const [isInstalledGlobal, setIsInstalledGlobal] = useState(false)
+
   const forcePromptCallbacks = useRef<Set<() => void>>(new Set())
+
+  // Capture beforeinstallprompt and appinstalled events at app startup
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const checkInstalled = () => {
+      const isStandalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as any).standalone === true
+      setIsInstalledGlobal(isStandalone)
+    }
+
+    checkInstalled()
+
+    const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
+      e.preventDefault()
+      setDeferredPrompt(e)
+      setIsInstallableGlobal(true)
+      setInstallMethodGlobal('native')
+    }
+
+    const handleAppInstalled = () => {
+      setIsInstalledGlobal(true)
+      setIsInstallableGlobal(false)
+      setDeferredPrompt(null)
+    }
+
+    window.addEventListener(
+      'beforeinstallprompt',
+      handleBeforeInstallPrompt as EventListener,
+    )
+    window.addEventListener('appinstalled', handleAppInstalled)
+
+    // Also check on display mode change
+    const mediaQuery = window.matchMedia('(display-mode: standalone)')
+    mediaQuery.addEventListener('change', checkInstalled)
+
+    return () => {
+      window.removeEventListener(
+        'beforeinstallprompt',
+        handleBeforeInstallPrompt as EventListener,
+      )
+      window.removeEventListener('appinstalled', handleAppInstalled)
+      mediaQuery.removeEventListener('change', checkInstalled)
+    }
+  }, [])
 
   const setOverrides = (newOverrides: PWADevOverrides) => {
     setOverridesState(newOverrides)
@@ -44,6 +105,15 @@ export function PWADevProvider({ children }: PWADevProviderProps) {
         detectedPlatformInfo,
         forceShowPrompt,
         subscribeToForcePrompt,
+        // Global PWA install state
+        deferredPrompt,
+        setDeferredPrompt,
+        isInstallableGlobal,
+        setIsInstallableGlobal,
+        installMethodGlobal,
+        setInstallMethodGlobal,
+        isInstalledGlobal,
+        setIsInstalledGlobal,
       }}
     >
       {children}
