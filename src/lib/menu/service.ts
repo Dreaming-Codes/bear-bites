@@ -6,6 +6,7 @@ import {
 } from './scraper'
 import type { DayMenu, FoodDetail, Location } from './schemas'
 import { LOCATIONS } from './schemas'
+import { nowInLA, toJSDate } from '../timezone'
 
 const MENU_CACHE_TTL_SECONDS = 60 * 60 * 24 // 1 day for menu data
 const FOOD_LABEL_CACHE_TTL_SECONDS = 60 * 60 * 24 * 7 // 1 week for food labels
@@ -141,10 +142,8 @@ export class MenuService {
       return cached
     }
 
-    // Use LA timezone for consistent date handling with the dining hall
-    const today = new Date(
-      new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }),
-    )
+    const todayDT = nowInLA()
+    const today = toJSDate(todayDT)
     const maxEmptyDays = 3
     const maxSearchDays = 30 // Safety limit
 
@@ -152,13 +151,8 @@ export class MenuService {
     const backwardDates: Date[] = []
 
     for (let i = 1; i <= maxSearchDays; i++) {
-      const forwardDate = new Date(today)
-      forwardDate.setDate(forwardDate.getDate() + i)
-      forwardDates.push(forwardDate)
-
-      const backwardDate = new Date(today)
-      backwardDate.setDate(backwardDate.getDate() - i)
-      backwardDates.push(backwardDate)
+      forwardDates.push(toJSDate(todayDT.plus({ days: i })))
+      backwardDates.push(toJSDate(todayDT.minus({ days: i })))
     }
 
     const [forwardMenus, backwardMenus] = await Promise.all([

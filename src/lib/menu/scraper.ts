@@ -8,6 +8,7 @@ import type {
   MenuItem,
   Nutrition,
 } from './schemas'
+import { formatDateLA } from '../timezone'
 
 const FOODPRO_BASE_URL = 'https://foodpro.ucr.edu/foodpro'
 
@@ -516,8 +517,7 @@ export function buildMenuUrl(
 }
 
 export function formatDateISO(date: Date): string {
-  // Use LA timezone to ensure consistent date formatting across client/server
-  return date.toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' })
+  return formatDateLA(date)
 }
 
 export function buildLabelUrl(
