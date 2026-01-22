@@ -87,13 +87,28 @@ export const NutritionSchema = z.object({
   }),
 })
 
+// Recursive ingredient structure for nested lists
+export interface Ingredient {
+  name: string
+  isNote?: boolean // For items like "*Organic"
+  children?: Ingredient[]
+}
+
+export const IngredientSchema: z.ZodType<Ingredient> = z.lazy(() =>
+  z.object({
+    name: z.string(),
+    isNote: z.boolean().optional(),
+    children: z.array(IngredientSchema).optional(),
+  }),
+)
+
 export const FoodDetailSchema = z.object({
   id: z.string(),
   name: z.string(),
   dietaryTags: z.array(DietaryTagSchema),
   allergens: z.array(AllergenSchema),
   nutrition: NutritionSchema,
-  ingredients: z.string(), // Raw ingredients text
+  ingredients: z.array(IngredientSchema), // Structured ingredients list
 })
 
 export const DayMenuSchema = z.object({

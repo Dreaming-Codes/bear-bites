@@ -8,6 +8,7 @@ import {
   Container,
   GlassCard,
   GlassButton,
+  IngredientsList,
 } from '@/components/bear-bites'
 import {
   DietaryTags,
@@ -332,14 +333,7 @@ function FoodDetailPage() {
             </GlassCard>
 
             {/* Ingredients */}
-            {food.ingredients && (
-              <GlassCard>
-                <h2 className="font-semibold mb-2">Ingredients</h2>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {food.ingredients}
-                </p>
-              </GlassCard>
-            )}
+            <IngredientsList ingredients={food.ingredients} />
           </div>
         )}
       </Container>

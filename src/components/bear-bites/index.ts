@@ -24,3 +24,4 @@ export {
 } from './DietaryFilter'
 
 export { FoodCard, FoodGrid, StationGroup } from './FoodCard'
+export { IngredientsList } from './IngredientsList'
