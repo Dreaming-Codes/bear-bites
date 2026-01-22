@@ -8,7 +8,34 @@ import { InstallInstructions } from '@/components/InstallInstructions'
 import { cn } from '@/lib/utils'
 import { APP_VERSION } from '@/lib/version'
 
-export const Route = createFileRoute('/profile')({ component: ProfilePage })
+export const Route = createFileRoute('/profile')({
+  component: ProfilePage,
+  head: () => ({
+    meta: [
+      {
+        title: 'Profile & Settings - Bear Bites | UCR Dining Menu',
+      },
+      {
+        name: 'description',
+        content:
+          'Manage your Bear Bites profile, sync favorites across devices, and customize your UCR dining menu experience.',
+      },
+      {
+        property: 'og:title',
+        content: 'Profile & Settings - Bear Bites | UCR Dining Menu',
+      },
+      {
+        property: 'og:description',
+        content:
+          'Manage your Bear Bites profile and customize your UCR dining menu experience.',
+      },
+      {
+        property: 'og:url',
+        content: 'https://bearbites.dreaming.codes/profile',
+      },
+    ],
+  }),
+})
 
 function SettingRow({
   icon: Icon,

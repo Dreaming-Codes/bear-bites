@@ -13,6 +13,31 @@ import { LOCATIONS } from '@/lib/menu/schemas'
 
 export const Route = createFileRoute('/favorites')({
   component: FavoritesPage,
+  head: () => ({
+    meta: [
+      {
+        title: 'My Favorite Foods - Bear Bites | UCR Dining Menu',
+      },
+      {
+        name: 'description',
+        content:
+          'Save and track your favorite UCR dining hall foods. Quick access to your preferred meals at Glasgow, Lothian, and all UC Riverside dining locations.',
+      },
+      {
+        property: 'og:title',
+        content: 'My Favorite Foods - Bear Bites | UCR Dining Menu',
+      },
+      {
+        property: 'og:description',
+        content:
+          'Save and track your favorite UCR dining hall foods. Quick access to your preferred meals at Glasgow, Lothian, and all UC Riverside dining locations.',
+      },
+      {
+        property: 'og:url',
+        content: 'https://bearbites.dreaming.codes/favorites',
+      },
+    ],
+  }),
 })
 
 function FavoritesPage() {

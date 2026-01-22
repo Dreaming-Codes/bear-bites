@@ -1,15 +1,6 @@
 import { Link, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
-import {
-  Menu,
-  X,
-  Home,
-  Heart,
-  Calendar,
-  Settings,
-  User,
-  ChevronLeft,
-} from 'lucide-react'
+import { Menu, X, Home, Heart, Settings, User, ChevronLeft } from 'lucide-react'
 import { useSession, signIn, signOut } from '@/lib/auth-client'
 
 interface AppHeaderProps {
@@ -117,7 +108,6 @@ function MobileNav({ isOpen, onClose, session }: MobileNavProps) {
   const navItems = [
     { to: '/', icon: Home, label: 'Menu' },
     { to: '/favorites', icon: Heart, label: 'Favorites' },
-    { to: '/meal-plan', icon: Calendar, label: 'Meal Plan' },
     { to: '/settings', icon: Settings, label: 'Settings' },
   ]
 

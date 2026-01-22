@@ -58,6 +58,33 @@ const searchSchema = z.object({
 export const Route = createFileRoute('/')({
   component: HomePage,
   validateSearch: searchSchema,
+  head: () => ({
+    meta: [
+      {
+        title:
+          "UCR Dining Menu - Bear Bites | Today's Menu at Glasgow & Lothian",
+      },
+      {
+        name: 'description',
+        content:
+          "View today's UCR dining menu for Glasgow, Lothian, and all UC Riverside dining halls. Filter by vegan, vegetarian, gluten-free options. Real-time meal hours, nutrition info, and dietary filtering.",
+      },
+      {
+        property: 'og:title',
+        content:
+          "UCR Dining Menu - Bear Bites | Today's Menu at Glasgow & Lothian",
+      },
+      {
+        property: 'og:description',
+        content:
+          "View today's UCR dining menu for Glasgow, Lothian, and all UC Riverside dining halls. Filter by dietary preferences and save favorites.",
+      },
+      {
+        property: 'og:url',
+        content: 'https://bearbites.dreaming.codes/',
+      },
+    ],
+  }),
 })
 
 function getRiversideDate(): Date {

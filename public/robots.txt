@@ -1,3 +1,23 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+
+# Sitemap
+Sitemap: https://bearbites.dreaming.codes/sitemap.xml
+
+# Crawl-delay for politeness
+Crawl-delay: 1
+
+# Block API endpoints from being indexed
+Disallow: /api/
+Disallow: /_build/
+
+# Allow all major search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
