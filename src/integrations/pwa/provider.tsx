@@ -45,7 +45,6 @@ export function PWADevProvider({ children }: PWADevProviderProps) {
     checkInstalled()
 
     const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
-      e.preventDefault()
       setDeferredPrompt(e)
       setIsInstallableGlobal(true)
       setInstallMethodGlobal('native')
