@@ -39,6 +39,14 @@ import { cn } from '@/lib/utils'
 import { useFavorites } from '@/hooks/useFavorites'
 import { usePersistedFilters } from '@/hooks/usePersistedFilters'
 import { useState } from 'react'
+import { DateTime } from 'luxon'
+import {
+  LA_TIMEZONE,
+  nowInLA,
+  parseDateInLA,
+  formatDateLA,
+  toJSDate,
+} from '@/lib/timezone'
 
 const searchSchema = z.object({
   date: z.string().optional(),
@@ -53,39 +61,32 @@ export const Route = createFileRoute('/')({
 })
 
 function getRiversideDate(): Date {
-  return new Date(
-    new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }),
-  )
+  return toJSDate(nowInLA())
 }
 
 function formatDate(date: Date): string {
-  // en-CA locale outputs YYYY-MM-DD format which is what we need for API/URL params
-  return date.toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' })
+  return formatDateLA(date)
 }
 
 function parseDate(dateStr: string): Date {
-  const date = new Date(dateStr + 'T12:00:00')
-  return isNaN(date.getTime()) ? getRiversideDate() : date
+  const dt = parseDateInLA(dateStr)
+  return dt.isValid ? toJSDate(dt) : getRiversideDate()
 }
 
 function formatDisplayDate(date: Date): string {
-  const today = getRiversideDate()
-  const tomorrow = new Date(today)
-  tomorrow.setDate(tomorrow.getDate() + 1)
-  const yesterday = new Date(today)
-  yesterday.setDate(yesterday.getDate() - 1)
+  const todayDT = nowInLA()
+  const dateDT = DateTime.fromJSDate(date).setZone(LA_TIMEZONE)
 
-  const dateStr = formatDate(date)
-  if (dateStr === formatDate(today)) return 'Today'
-  if (dateStr === formatDate(tomorrow)) return 'Tomorrow'
-  if (dateStr === formatDate(yesterday)) return 'Yesterday'
+  const dateStr = dateDT.toFormat('yyyy-MM-dd')
+  const todayStr = todayDT.toFormat('yyyy-MM-dd')
+  const tomorrowStr = todayDT.plus({ days: 1 }).toFormat('yyyy-MM-dd')
+  const yesterdayStr = todayDT.minus({ days: 1 }).toFormat('yyyy-MM-dd')
 
-  return date.toLocaleDateString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    timeZone: 'America/Los_Angeles',
-  })
+  if (dateStr === todayStr) return 'Today'
+  if (dateStr === tomorrowStr) return 'Tomorrow'
+  if (dateStr === yesterdayStr) return 'Yesterday'
+
+  return dateDT.toFormat('ccc, MMM d')
 }
 
 function getCurrentMeal(locationId: string): Meal {

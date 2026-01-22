@@ -11,6 +11,7 @@ import {
   LOCATIONS,
 } from '@/lib/menu'
 import { buildLabelUrl } from '@/lib/menu/scraper'
+import { parseDateInLA, toJSDate } from '@/lib/timezone'
 
 function getMenuService() {
   return createMenuService((env as Cloudflare.Env).MENU_CACHE)
@@ -32,7 +33,7 @@ export const getMenu = os
   )
   .output(DayMenuSchema.nullable())
   .handler(async ({ input }) => {
-    const date = new Date(input.date + 'T00:00:00')
+    const date = toJSDate(parseDateInLA(input.date))
     return getMenuService().getMenu(input.locationId, date)
   })
 
@@ -46,7 +47,7 @@ export const getMenusForWeek = os
   )
   .output(z.array(DayMenuSchema.nullable()))
   .handler(async ({ input }) => {
-    const startDate = new Date(input.startDate + 'T00:00:00')
+    const startDate = toJSDate(parseDateInLA(input.startDate))
     return getMenuService().getMenusForDateRange(
       input.locationId,
       startDate,
@@ -69,7 +70,7 @@ export const getFoodDetail = os
       return null
     }
 
-    const date = new Date(input.date + 'T12:00:00')
+    const date = toJSDate(parseDateInLA(input.date))
     const labelUrl = buildLabelUrl(
       input.itemId,
       input.locationId,
@@ -96,7 +97,7 @@ export const searchMenuItems = os
     ),
   )
   .handler(async ({ input }) => {
-    const date = new Date(input.date + 'T00:00:00')
+    const date = toJSDate(parseDateInLA(input.date))
     const menu = await getMenuService().getMenu(input.locationId, date)
 
     if (!menu) {
@@ -137,7 +138,7 @@ export const getFilteredMenu = os
   )
   .output(DayMenuSchema.nullable())
   .handler(async ({ input }) => {
-    const date = new Date(input.date + 'T00:00:00')
+    const date = toJSDate(parseDateInLA(input.date))
     const menu = await getMenuService().getMenu(input.locationId, date)
 
     if (!menu) {
