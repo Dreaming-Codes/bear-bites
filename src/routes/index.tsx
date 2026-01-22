@@ -261,7 +261,7 @@ function HomePage() {
     navigate({
       to: '/',
       search: {
-        date: formatDate(new Date()),
+        date: formatDate(getRiversideDate()),
         location: selectedLocation.id,
         meal: getCurrentMeal(),
       },

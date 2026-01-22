@@ -516,7 +516,8 @@ export function buildMenuUrl(
 }
 
 export function formatDateISO(date: Date): string {
-  return date.toISOString().split('T')[0]
+  // Use LA timezone to ensure consistent date formatting across client/server
+  return date.toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' })
 }
 
 export function buildLabelUrl(
