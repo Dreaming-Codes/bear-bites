@@ -91,7 +91,7 @@ function formatDisplayDate(date: Date): string {
 
 function getCurrentMeal(locationId: string): Meal {
   const now = getRiversideDate()
-  return getCurrentOrNextMeal(locationId, now, now)
+  return getCurrentOrNextMeal(locationId, now)
 }
 
 const MEALS: { id: Meal; label: string }[] = [
@@ -157,11 +157,7 @@ function HomePage() {
         updateSearch({ location: location.id })
       } else {
         // Switch to the best meal for the new location
-        const bestMeal = getCurrentOrNextMeal(
-          location.id,
-          selectedDate,
-          getRiversideDate(),
-        )
+        const bestMeal = getCurrentOrNextMeal(location.id, selectedDate)
         updateSearch({ location: location.id, meal: bestMeal })
       }
     },
@@ -440,12 +436,7 @@ function HomePage() {
                 const now = getRiversideDate()
                 const isTodayDate = formatDate(selectedDate) === formatDate(now)
                 const mealStatus = isTodayDate
-                  ? getMealStatus(
-                      selectedLocation.id,
-                      meal.id,
-                      selectedDate,
-                      now,
-                    )
+                  ? getMealStatus(selectedLocation.id, meal.id, selectedDate)
                   : null
 
                 const isCurrentlyOpen = mealStatus === 'open'

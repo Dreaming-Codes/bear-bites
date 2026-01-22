@@ -134,16 +134,28 @@ const MEAL_ORDER: Meal[] = ['breakfast', 'brunch', 'lunch', 'dinner']
 
 export type MealStatus = 'open' | 'upcoming' | 'closed'
 
+// Get current time as minutes since midnight in LA timezone
+function getCurrentMinutesLA(): number {
+  const now = new Date()
+  const laTimeStr = now.toLocaleTimeString('en-US', {
+    timeZone: 'America/Los_Angeles',
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+  const [hours, minutes] = laTimeStr.split(':').map(Number)
+  return hours * 60 + minutes
+}
+
 export function getMealStatus(
   locationId: string,
   meal: Meal,
-  date: Date,
-  currentTime: Date,
+  date: Date | string,
 ): MealStatus {
   const hours = getMealHours(locationId, meal, date)
   if (!hours) return 'closed'
 
-  const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes()
+  const currentMinutes = getCurrentMinutesLA()
   const startMinutes = parseTimeToMinutes(hours.start)
   const endMinutes = parseTimeToMinutes(hours.end)
 
@@ -155,18 +167,17 @@ export function getMealStatus(
 
 export function getCurrentOrNextMeal(
   locationId: string,
-  date: Date,
-  currentTime: Date,
+  date: Date | string,
 ): Meal {
   // First, check if any meal is currently open
   for (const meal of MEAL_ORDER) {
-    const status = getMealStatus(locationId, meal, date, currentTime)
+    const status = getMealStatus(locationId, meal, date)
     if (status === 'open') return meal
   }
 
   // If no meal is open, find the next upcoming meal
   for (const meal of MEAL_ORDER) {
-    const status = getMealStatus(locationId, meal, date, currentTime)
+    const status = getMealStatus(locationId, meal, date)
     if (status === 'upcoming') return meal
   }
 
