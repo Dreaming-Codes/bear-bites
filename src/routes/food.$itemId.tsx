@@ -27,6 +27,28 @@ const searchSchema = z.object({
 export const Route = createFileRoute('/food/$itemId')({
   component: FoodDetailPage,
   validateSearch: searchSchema,
+  head: ({ params }) => {
+    const itemName = decodeURIComponent(params.itemId).replace(/-/g, ' ')
+    return {
+      meta: [
+        {
+          title: `${itemName} - Nutrition Info | Bear Bites UCR Dining Menu`,
+        },
+        {
+          name: 'description',
+          content: `View nutrition facts, calories, allergens, and ingredients for ${itemName} at UC Riverside dining halls. Part of the Bear Bites UCR dining menu app.`,
+        },
+        {
+          property: 'og:title',
+          content: `${itemName} - Nutrition Info | Bear Bites UCR Dining Menu`,
+        },
+        {
+          property: 'og:description',
+          content: `View nutrition facts, calories, allergens, and ingredients for ${itemName} at UC Riverside dining halls.`,
+        },
+      ],
+    }
+  },
 })
 
 function NutritionRow({

@@ -1,7 +1,7 @@
 {
   "short_name": "Bear Bites",
-  "name": "Bear Bites - UCR Dining Menu",
-  "description": "Browse UCR dining hall menus, filter by dietary preferences, and save your favorite foods.",
+  "name": "UCR Dining Menu - Bear Bites | UC Riverside Dining Hall Menus",
+  "description": "View today's UCR dining menu for Glasgow, Lothian, and all UC Riverside dining halls. Filter by vegan, vegetarian, gluten-free options. Real-time meal hours and nutrition info.",
   "icons": [
     {
       "src": "favicon.ico",
