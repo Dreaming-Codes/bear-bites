@@ -29,15 +29,15 @@ export class MenuService {
     this.kv = kv
   }
 
-    getLocations(): Location[] {
+  getLocations(): Location[] {
     return LOCATIONS
   }
 
-    getLocation(locationId: string): Location | undefined {
+  getLocation(locationId: string): Location | undefined {
     return LOCATIONS.find((loc) => loc.id === locationId)
   }
 
-    async getMenu(locationId: string, date: Date): Promise<DayMenu | null> {
+  async getMenu(locationId: string, date: Date): Promise<DayMenu | null> {
     const location = this.getLocation(locationId)
     if (!location) {
       return null
@@ -63,7 +63,7 @@ export class MenuService {
       const html = await response.text()
       const menu = parseShortMenu(html, locationId, location.name, dateStr)
 
-        await this.kv.put(cacheKey, JSON.stringify(menu), {
+      await this.kv.put(cacheKey, JSON.stringify(menu), {
         expirationTtl: MENU_CACHE_TTL_SECONDS,
       })
 
@@ -74,7 +74,7 @@ export class MenuService {
     }
   }
 
-    async getFoodDetail(
+  async getFoodDetail(
     itemId: string,
     labelUrl: string,
   ): Promise<FoodDetail | null> {
@@ -96,7 +96,7 @@ export class MenuService {
       const html = await response.text()
       const detail = parseLabelPage(html, itemId)
 
-        await this.kv.put(cacheKey, JSON.stringify(detail), {
+      await this.kv.put(cacheKey, JSON.stringify(detail), {
         expirationTtl: FOOD_LABEL_CACHE_TTL_SECONDS,
       })
 
@@ -107,7 +107,7 @@ export class MenuService {
     }
   }
 
-    async getMenusForDateRange(
+  async getMenusForDateRange(
     locationId: string,
     startDate: Date,
     days: number,
@@ -123,12 +123,12 @@ export class MenuService {
     return Promise.all(promises)
   }
 
-    private menuHasItems(menu: DayMenu | null): boolean {
+  private menuHasItems(menu: DayMenu | null): boolean {
     if (!menu?.meals) return false
     return Object.values(menu.meals).some((items) => items && items.length > 0)
   }
 
-    async getDateBounds(
+  async getDateBounds(
     locationId: string,
   ): Promise<{ minDate: string; maxDate: string }> {
     const cacheKey = getDateBoundsCacheKey(locationId)
@@ -141,7 +141,10 @@ export class MenuService {
       return cached
     }
 
-    const today = new Date()
+    // Use LA timezone for consistent date handling with the dining hall
+    const today = new Date(
+      new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }),
+    )
     const maxEmptyDays = 3
     const maxSearchDays = 30 // Safety limit
 
