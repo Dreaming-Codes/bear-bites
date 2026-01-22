@@ -9,9 +9,22 @@ import {
   Filter,
   Loader2,
   Calendar,
+  XCircle,
 } from 'lucide-react'
 import { orpc } from '@/orpc/client'
-import { LOCATIONS, type Meal, type MenuItem } from '@/lib/menu/schemas'
+import {
+  LOCATIONS,
+  type Meal,
+  type MenuItem,
+  getMealHours,
+  formatMealHours,
+  getMealStatus,
+  getCurrentOrNextMeal,
+  getApiMealKey,
+  hasMealData,
+  isLocationClosedForDay,
+  getAvailableMeals,
+} from '@/lib/menu/schemas'
 import {
   PageWrapper,
   Container,
@@ -75,15 +88,14 @@ function formatDisplayDate(date: Date): string {
   })
 }
 
-function getCurrentMeal(): Meal {
-  const hour = getRiversideDate().getHours()
-  if (hour < 10) return 'breakfast'
-  if (hour < 14) return 'lunch'
-  return 'dinner'
+function getCurrentMeal(locationId: string): Meal {
+  const now = getRiversideDate()
+  return getCurrentOrNextMeal(locationId, now, now)
 }
 
 const MEALS: { id: Meal; label: string }[] = [
   { id: 'breakfast', label: 'Breakfast' },
+  { id: 'brunch', label: 'Brunch' },
   { id: 'lunch', label: 'Lunch' },
   { id: 'dinner', label: 'Dinner' },
 ]
@@ -95,7 +107,7 @@ function HomePage() {
   const selectedDate = search.date ? parseDate(search.date) : getRiversideDate()
   const selectedLocation =
     LOCATIONS.find((l) => l.id === search.location) || LOCATIONS[1]
-  const selectedMeal: Meal = search.meal || getCurrentMeal()
+  const selectedMeal: Meal = search.meal || getCurrentMeal(selectedLocation.id)
   const groupByStation = search.view !== 'all'
 
   const [isFilterOpen, setIsFilterOpen] = useState(false)
@@ -132,9 +144,27 @@ function HomePage() {
 
   const setSelectedLocation = useCallback(
     (location: (typeof LOCATIONS)[0]) => {
-      updateSearch({ location: location.id })
+      // Check if current meal is available at the new location
+      const availableMealsAtLocation = getAvailableMeals(
+        location.id,
+        selectedDate,
+      )
+      const currentMealAvailable =
+        availableMealsAtLocation.includes(selectedMeal)
+
+      if (currentMealAvailable) {
+        updateSearch({ location: location.id })
+      } else {
+        // Switch to the best meal for the new location
+        const bestMeal = getCurrentOrNextMeal(
+          location.id,
+          selectedDate,
+          getRiversideDate(),
+        )
+        updateSearch({ location: location.id, meal: bestMeal })
+      }
     },
-    [updateSearch],
+    [updateSearch, selectedDate, selectedMeal],
   )
 
   const setSelectedMeal = useCallback(
@@ -174,7 +204,9 @@ function HomePage() {
 
   const mealItems = useMemo(() => {
     if (!menuQuery.data?.meals) return []
-    let items = menuQuery.data.meals[selectedMeal] || []
+    // Map display meal to API meal key (e.g., brunch -> lunch on weekends)
+    const apiMealKey = getApiMealKey(selectedMeal, selectedDate)
+    let items = menuQuery.data.meals[apiMealKey] || []
 
     if (hasActiveFilters) {
       items = items.filter((item) => {
@@ -220,12 +252,12 @@ function HomePage() {
   const availableMeals = useMemo(() => {
     const meals = menuQuery.data?.meals
     if (!meals) return new Set<Meal>()
+    // Check which display meals have data (considering brunch/lunch mapping)
+    const allMeals: Meal[] = ['breakfast', 'brunch', 'lunch', 'dinner']
     return new Set(
-      Object.keys(meals).filter(
-        (meal) => (meals[meal as Meal]?.length || 0) > 0,
-      ) as Meal[],
+      allMeals.filter((meal) => hasMealData(meal, meals, selectedDate)),
     )
-  }, [menuQuery.data])
+  }, [menuQuery.data, selectedDate])
 
   const dateBoundsQuery = useQuery(
     orpc.menu.getDateBounds.queryOptions({
@@ -263,7 +295,7 @@ function HomePage() {
       search: {
         date: formatDate(getRiversideDate()),
         location: selectedLocation.id,
-        meal: getCurrentMeal(),
+        meal: getCurrentMeal(selectedLocation.id),
       },
       replace: true,
     })
@@ -355,144 +387,227 @@ function HomePage() {
           </div>
         </GlassCard>
 
-        {/* Meal Tabs */}
-        <div className="flex gap-1 mb-4 bg-muted rounded-lg p-1">
-          {MEALS.map((meal) => {
-            const isAvailable = availableMeals.has(meal.id)
-            const isSelected = selectedMeal === meal.id
-
-            return (
-              <button
-                key={meal.id}
-                onClick={() => setSelectedMeal(meal.id)}
-                disabled={!isAvailable && !menuQuery.isLoading}
-                className={cn(
-                  'flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all',
-                  isSelected
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground',
-                  !isAvailable &&
-                    !menuQuery.isLoading &&
-                    'opacity-40 cursor-not-allowed',
-                )}
-              >
-                {meal.label}
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Quick Dietary Filters */}
-        <div className="mb-4">
-          <QuickFilterBar filters={filters} onChange={setFilters} />
-        </div>
-
-        {/* View Toggle & Filter */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex gap-2">
-            <GlassButton
-              variant={groupByStation ? 'primary' : 'ghost'}
-              size="sm"
-              onClick={() => updateSearch({ view: 'station' })}
-            >
-              By Station
-            </GlassButton>
-            <GlassButton
-              variant={!groupByStation ? 'primary' : 'ghost'}
-              size="sm"
-              onClick={() => updateSearch({ view: 'all' })}
-            >
-              All Items
-            </GlassButton>
-          </div>
-
-          <GlassButton
-            variant={hasActiveFilters ? 'primary' : 'ghost'}
-            size="sm"
-            className="flex items-center gap-1"
-            onClick={() => setIsFilterOpen(true)}
-          >
-            <Filter size={16} />
-            Filter
-            {activeFilterCount > 0 && (
-              <span className="ml-1 bg-background text-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                {activeFilterCount}
-              </span>
-            )}
-          </GlassButton>
-        </div>
-
-        {/* Content */}
-        {menuQuery.isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 size={40} className="animate-spin text-primary mb-4" />
-            <p className="text-muted-foreground">Loading menu...</p>
-          </div>
-        ) : menuQuery.isError ? (
-          <GlassCard className="text-center py-12">
-            <p className="text-destructive mb-2">Failed to load menu</p>
-            <p className="text-sm text-muted-foreground mb-4">
-              {menuQuery.error?.message || 'Please try again later'}
+        {/* Check if location is closed for the day */}
+        {isLocationClosedForDay(selectedLocation.id, selectedDate) ? (
+          <GlassCard className="text-center py-16">
+            <XCircle size={48} className="mx-auto text-red-500/70 mb-4" />
+            <p className="text-xl font-semibold mb-2">
+              {selectedLocation.name} is closed
             </p>
-            <GlassButton variant="primary" onClick={() => menuQuery.refetch()}>
-              Retry
-            </GlassButton>
-          </GlassCard>
-        ) : mealItems.length === 0 ? (
-          <GlassCard className="text-center py-12">
-            <p className="text-lg font-medium mb-2">No menu available</p>
-            <p className="text-muted-foreground">
-              {hasActiveFilters
-                ? 'No items match your filters. Try adjusting them.'
-                : availableMeals.size === 0
-                  ? 'No menu data for this date'
-                  : `Try selecting a different meal`}
+            <p className="text-muted-foreground mb-6">
+              {selectedDate.toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+                timeZone: 'America/Los_Angeles',
+              })}
             </p>
-            {hasActiveFilters && (
+            <div className="flex gap-3 justify-center">
               <GlassButton
                 variant="ghost"
-                className="mt-4"
-                onClick={() => setFilters(DEFAULT_FILTERS)}
+                onClick={() =>
+                  setSelectedLocation(
+                    LOCATIONS.find((l) => l.id !== selectedLocation.id) ||
+                      LOCATIONS[0],
+                  )
+                }
               >
-                Clear Filters
+                Try {LOCATIONS.find((l) => l.id !== selectedLocation.id)?.name}
               </GlassButton>
-            )}
+              <GlassButton variant="primary" onClick={goToNextDay}>
+                Next Day
+              </GlassButton>
+            </div>
           </GlassCard>
-        ) : groupByStation ? (
-          <div className="space-y-6">
-            {/* Favorites group at the top */}
-            {favoritedMealItems.length > 0 && (
-              <StationGroup
-                station="⭐ Favorites"
-                items={favoritedMealItems}
+        ) : (
+          <>
+            {/* Meal Tabs */}
+            <div className="flex gap-1 mb-4 bg-muted rounded-lg p-1">
+              {MEALS.map((meal) => {
+                const hours = getMealHours(
+                  selectedLocation.id,
+                  meal.id,
+                  selectedDate,
+                )
+                const isAvailable = availableMeals.has(meal.id)
+                const isSelected = selectedMeal === meal.id
+                const isClosed = hours === null
+
+                // Skip meals that have no scheduled hours for this location/day
+                if (isClosed) return null
+
+                const now = getRiversideDate()
+                const isTodayDate = formatDate(selectedDate) === formatDate(now)
+                const mealStatus = isTodayDate
+                  ? getMealStatus(
+                      selectedLocation.id,
+                      meal.id,
+                      selectedDate,
+                      now,
+                    )
+                  : null
+
+                const isCurrentlyOpen = mealStatus === 'open'
+                const isUpcoming = mealStatus === 'upcoming'
+                const isPast = mealStatus === 'closed'
+
+                return (
+                  <button
+                    key={meal.id}
+                    onClick={() => setSelectedMeal(meal.id)}
+                    disabled={!isAvailable && !menuQuery.isLoading}
+                    className={cn(
+                      'flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all flex flex-col items-center relative',
+                      isSelected
+                        ? 'bg-background text-foreground shadow-sm'
+                        : 'text-muted-foreground',
+                      !isAvailable &&
+                        !menuQuery.isLoading &&
+                        'opacity-40 cursor-not-allowed',
+                    )}
+                  >
+                    <span className="flex items-center gap-1">
+                      {meal.label}
+                      {isTodayDate && isCurrentlyOpen && (
+                        <span
+                          className="w-2 h-2 bg-green-500 rounded-full animate-pulse"
+                          title="Open now"
+                        />
+                      )}
+                    </span>
+                    <span
+                      className={cn(
+                        'text-xs',
+                        isTodayDate &&
+                          isCurrentlyOpen &&
+                          'text-green-500 font-medium',
+                        isTodayDate && isUpcoming && 'text-yellow-500',
+                        isTodayDate && isPast && 'text-red-500/70',
+                      )}
+                    >
+                      {formatMealHours(hours)}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Quick Dietary Filters */}
+            <div className="mb-4">
+              <QuickFilterBar filters={filters} onChange={setFilters} />
+            </div>
+
+            {/* View Toggle & Filter */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex gap-2">
+                <GlassButton
+                  variant={groupByStation ? 'primary' : 'ghost'}
+                  size="sm"
+                  onClick={() => updateSearch({ view: 'station' })}
+                >
+                  By Station
+                </GlassButton>
+                <GlassButton
+                  variant={!groupByStation ? 'primary' : 'ghost'}
+                  size="sm"
+                  onClick={() => updateSearch({ view: 'all' })}
+                >
+                  All Items
+                </GlassButton>
+              </div>
+
+              <GlassButton
+                variant={hasActiveFilters ? 'primary' : 'ghost'}
+                size="sm"
+                className="flex items-center gap-1"
+                onClick={() => setIsFilterOpen(true)}
+              >
+                <Filter size={16} />
+                Filter
+                {activeFilterCount > 0 && (
+                  <span className="ml-1 bg-background text-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </GlassButton>
+            </div>
+
+            {/* Content */}
+            {menuQuery.isLoading ? (
+              <div className="flex flex-col items-center justify-center py-20">
+                <Loader2 size={40} className="animate-spin text-primary mb-4" />
+                <p className="text-muted-foreground">Loading menu...</p>
+              </div>
+            ) : menuQuery.isError ? (
+              <GlassCard className="text-center py-12">
+                <p className="text-destructive mb-2">Failed to load menu</p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {menuQuery.error?.message || 'Please try again later'}
+                </p>
+                <GlassButton
+                  variant="primary"
+                  onClick={() => menuQuery.refetch()}
+                >
+                  Retry
+                </GlassButton>
+              </GlassCard>
+            ) : mealItems.length === 0 ? (
+              <GlassCard className="text-center py-12">
+                <p className="text-lg font-medium mb-2">No menu available</p>
+                <p className="text-muted-foreground">
+                  {hasActiveFilters
+                    ? 'No items match your filters. Try adjusting them.'
+                    : availableMeals.size === 0
+                      ? 'No menu data for this date'
+                      : `Try selecting a different meal`}
+                </p>
+                {hasActiveFilters && (
+                  <GlassButton
+                    variant="ghost"
+                    className="mt-4"
+                    onClick={() => setFilters(DEFAULT_FILTERS)}
+                  >
+                    Clear Filters
+                  </GlassButton>
+                )}
+              </GlassCard>
+            ) : groupByStation ? (
+              <div className="space-y-6">
+                {/* Favorites group at the top */}
+                {favoritedMealItems.length > 0 && (
+                  <StationGroup
+                    station="⭐ Favorites"
+                    items={favoritedMealItems}
+                    date={formatDate(selectedDate)}
+                    locationId={selectedLocation.id}
+                    favorites={favoriteIds}
+                    onToggleFavorite={handleToggleFavorite}
+                    showStationInCards={true}
+                  />
+                )}
+                {/* Regular station groups */}
+                {stationGroups.map(([station, items]) => (
+                  <StationGroup
+                    key={station}
+                    station={station}
+                    items={items}
+                    date={formatDate(selectedDate)}
+                    locationId={selectedLocation.id}
+                    favorites={favoriteIds}
+                    onToggleFavorite={handleToggleFavorite}
+                  />
+                ))}
+              </div>
+            ) : (
+              <FoodGrid
+                items={mealItems}
                 date={formatDate(selectedDate)}
                 locationId={selectedLocation.id}
                 favorites={favoriteIds}
                 onToggleFavorite={handleToggleFavorite}
-                showStationInCards={true}
               />
             )}
-            {/* Regular station groups */}
-            {stationGroups.map(([station, items]) => (
-              <StationGroup
-                key={station}
-                station={station}
-                items={items}
-                date={formatDate(selectedDate)}
-                locationId={selectedLocation.id}
-                favorites={favoriteIds}
-                onToggleFavorite={handleToggleFavorite}
-              />
-            ))}
-          </div>
-        ) : (
-          <FoodGrid
-            items={mealItems}
-            date={formatDate(selectedDate)}
-            locationId={selectedLocation.id}
-            favorites={favoriteIds}
-            onToggleFavorite={handleToggleFavorite}
-          />
+          </>
         )}
       </Container>
 

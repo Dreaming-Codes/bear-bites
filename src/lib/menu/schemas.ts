@@ -26,6 +26,197 @@ export const LOCATIONS: z.infer<typeof LocationSchema>[] = [
 
 export const MealSchema = z.enum(['breakfast', 'lunch', 'dinner', 'brunch'])
 
+// Meal hours by location and day type
+export type MealHours = {
+  start: string // e.g., "7:30 AM"
+  end: string // e.g., "10:30 AM"
+} | null // null means closed
+
+export type DayType = 'weekday' | 'weekend'
+
+// Get day of week in LA timezone from a date string (YYYY-MM-DD) or Date object
+function getDayOfWeekLA(date: Date | string): number {
+  if (typeof date === 'string') {
+    // Parse as LA timezone by creating a date at noon LA time
+    const laDate = new Date(
+      new Date(date + 'T12:00:00').toLocaleString('en-US', {
+        timeZone: 'America/Los_Angeles',
+      }),
+    )
+    return laDate.getDay()
+  }
+  // For Date objects, get the day in LA timezone
+  const laDateStr = date.toLocaleDateString('en-US', {
+    weekday: 'short',
+    timeZone: 'America/Los_Angeles',
+  })
+  const dayMap: Record<string, number> = {
+    Sun: 0,
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6,
+  }
+  return dayMap[laDateStr] ?? date.getDay()
+}
+
+function getDayType(date: Date | string): DayType {
+  const dayOfWeek = getDayOfWeekLA(date)
+  return dayOfWeek === 0 || dayOfWeek === 6 ? 'weekend' : 'weekday'
+}
+
+export const MEAL_HOURS: Record<
+  string, // locationId
+  Record<DayType, Record<Meal, MealHours>>
+> = {
+  // Glasgow (id: '03')
+  '03': {
+    weekday: {
+      breakfast: { start: '7:30 AM', end: '10:30 AM' },
+      lunch: { start: '10:30 AM', end: '2:30 PM' },
+      dinner: { start: '5:00 PM', end: '9:00 PM' },
+      brunch: null,
+    },
+    weekend: {
+      breakfast: null,
+      lunch: null,
+      dinner: { start: '5:00 PM', end: '9:00 PM' },
+      brunch: { start: '10:00 AM', end: '2:30 PM' },
+    },
+  },
+  // Lothian (id: '02')
+  '02': {
+    weekday: {
+      breakfast: null,
+      lunch: { start: '11:00 AM', end: '2:30 PM' },
+      dinner: { start: '5:00 PM', end: '10:00 PM' },
+      brunch: null,
+    },
+    weekend: {
+      breakfast: null,
+      lunch: null,
+      dinner: null,
+      brunch: null,
+    },
+  },
+}
+
+export function getMealHours(
+  locationId: string,
+  meal: Meal,
+  date: Date | string,
+): MealHours {
+  const dayType = getDayType(date)
+  return MEAL_HOURS[locationId]?.[dayType]?.[meal] ?? null
+}
+
+export function formatMealHours(hours: MealHours): string {
+  if (!hours) return 'Closed'
+  return `${hours.start} - ${hours.end}`
+}
+
+// Parse time string like "7:30 AM" to minutes since midnight
+function parseTimeToMinutes(timeStr: string): number {
+  const match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i)
+  if (!match) return 0
+  let hours = parseInt(match[1], 10)
+  const minutes = parseInt(match[2], 10)
+  const period = match[3].toUpperCase()
+  if (period === 'PM' && hours !== 12) hours += 12
+  if (period === 'AM' && hours === 12) hours = 0
+  return hours * 60 + minutes
+}
+
+// Order of meals throughout the day
+const MEAL_ORDER: Meal[] = ['breakfast', 'brunch', 'lunch', 'dinner']
+
+export type MealStatus = 'open' | 'upcoming' | 'closed'
+
+export function getMealStatus(
+  locationId: string,
+  meal: Meal,
+  date: Date,
+  currentTime: Date,
+): MealStatus {
+  const hours = getMealHours(locationId, meal, date)
+  if (!hours) return 'closed'
+
+  const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes()
+  const startMinutes = parseTimeToMinutes(hours.start)
+  const endMinutes = parseTimeToMinutes(hours.end)
+
+  if (currentMinutes < startMinutes) return 'upcoming'
+  if (currentMinutes >= startMinutes && currentMinutes < endMinutes)
+    return 'open'
+  return 'closed'
+}
+
+export function getCurrentOrNextMeal(
+  locationId: string,
+  date: Date,
+  currentTime: Date,
+): Meal {
+  // First, check if any meal is currently open
+  for (const meal of MEAL_ORDER) {
+    const status = getMealStatus(locationId, meal, date, currentTime)
+    if (status === 'open') return meal
+  }
+
+  // If no meal is open, find the next upcoming meal
+  for (const meal of MEAL_ORDER) {
+    const status = getMealStatus(locationId, meal, date, currentTime)
+    if (status === 'upcoming') return meal
+  }
+
+  // If all meals are closed (past dinner), return the last available meal
+  // or fall back to dinner
+  for (let i = MEAL_ORDER.length - 1; i >= 0; i--) {
+    const meal = MEAL_ORDER[i]
+    const hours = getMealHours(locationId, meal, date)
+    if (hours) return meal
+  }
+
+  return 'dinner'
+}
+
+export function getAvailableMeals(locationId: string, date: Date): Meal[] {
+  return MEAL_ORDER.filter(
+    (meal) => getMealHours(locationId, meal, date) !== null,
+  )
+}
+
+// Check if a location is completely closed for the day
+export function isLocationClosedForDay(
+  locationId: string,
+  date: Date,
+): boolean {
+  return getAvailableMeals(locationId, date).length === 0
+}
+
+// Map display meal to API meal key
+// On weekends, "brunch" in the UI maps to "lunch" data from the API
+export function getApiMealKey(meal: Meal, date: Date | string): Meal {
+  const dayType = getDayType(date)
+  const isWeekend = dayType === 'weekend'
+
+  if (meal === 'brunch' && isWeekend) {
+    return 'lunch' // API returns lunch data for weekend brunch
+  }
+  return meal
+}
+
+// Check if a display meal has data available (considering brunch/lunch mapping)
+export function hasMealData(
+  meal: Meal,
+  meals: Record<string, unknown[] | undefined>,
+  date: Date,
+): boolean {
+  const apiKey = getApiMealKey(meal, date)
+  return (meals[apiKey]?.length || 0) > 0
+}
+
 export const MenuItemSchema = z.object({
   id: z.string(), // RecNumAndPort from label URL
   name: z.string(),
