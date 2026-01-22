@@ -3,6 +3,7 @@ import type {
   DayMenu,
   DietaryTag,
   FoodDetail,
+  Ingredient,
   Meal,
   MenuItem,
   Nutrition,
@@ -56,6 +57,150 @@ function parseDietaryTags(html: string): DietaryTag[] {
   }
 
   return [...new Set(tags)] // Remove duplicates
+}
+
+/**
+ * Parse HTML ingredient list into structured data
+ * Handles nested ul/li structure from FoodPro
+ */
+function parseIngredientsHtml(html: string): Ingredient[] {
+  const ingredients: Ingredient[] = []
+
+  // Find the content of the outer <ul>
+  const ulMatch = html.match(/<ul>([\s\S]*)<\/ul>/i)
+  if (!ulMatch) return ingredients
+
+  const ulContent = ulMatch[1]
+
+  // Parse top-level <li> elements by tracking depth
+  let depth = 0
+  let currentLi = ''
+  let inLi = false
+  let i = 0
+
+  while (i < ulContent.length) {
+    // Check for opening tags
+    if (ulContent.slice(i, i + 4).toLowerCase() === '<li>') {
+      if (depth === 0) {
+        inLi = true
+        currentLi = ''
+      } else {
+        currentLi += '<li>'
+      }
+      depth++
+      i += 4
+      continue
+    }
+
+    // Check for closing </li> tags
+    if (ulContent.slice(i, i + 5).toLowerCase() === '</li>') {
+      depth--
+      if (depth === 0 && inLi) {
+        // Process this complete li
+        const ingredient = parseSingleLi(currentLi.trim())
+        if (ingredient) {
+          ingredients.push(ingredient)
+        }
+        inLi = false
+        currentLi = ''
+      } else {
+        currentLi += '</li>'
+      }
+      i += 5
+      continue
+    }
+
+    if (inLi) {
+      currentLi += ulContent[i]
+    }
+    i++
+  }
+
+  return ingredients
+}
+
+/**
+ * Parse a single <li> content (which may contain nested <ul>)
+ */
+function parseSingleLi(content: string): Ingredient | null {
+  if (!content) return null
+
+  // Check if there's a nested <ul>
+  const nestedMatch = content.match(/^([\s\S]*?)<ul>([\s\S]*)<\/ul>$/i)
+
+  if (nestedMatch) {
+    // Has children
+    let name = nestedMatch[1].trim()
+    // Remove any <em> tags but keep the text
+    name = name.replace(/<\/?em>/gi, '')
+    const childrenHtml = `<ul>${nestedMatch[2]}</ul>`
+
+    return {
+      name,
+      children: parseIngredientsHtml(childrenHtml),
+    }
+  } else {
+    // No children
+    const isNote = /<em>/i.test(content)
+    const name = content.replace(/<\/?em>/gi, '').trim()
+
+    return {
+      name,
+      isNote,
+    }
+  }
+}
+
+/**
+ * Parse ingredients from paragraph text (fallback for older format)
+ * Splits by comma while respecting parentheses for sub-ingredients
+ */
+function parseIngredientsParagraph(text: string): Ingredient[] {
+  const ingredients: Ingredient[] = []
+  let current = ''
+  let depth = 0
+
+  for (const char of text) {
+    if (char === '(') {
+      depth++
+      current += char
+    } else if (char === ')') {
+      depth--
+      current += char
+    } else if (char === ',' && depth === 0) {
+      const trimmed = current.trim()
+      if (trimmed) {
+        ingredients.push(parseIngredientWithParens(trimmed))
+      }
+      current = ''
+    } else {
+      current += char
+    }
+  }
+
+  // Don't forget the last ingredient
+  const trimmed = current.trim()
+  if (trimmed) {
+    ingredients.push(parseIngredientWithParens(trimmed))
+  }
+
+  return ingredients
+}
+
+/**
+ * Parse a single ingredient that may have sub-ingredients in parentheses
+ */
+function parseIngredientWithParens(text: string): Ingredient {
+  const match = text.match(/^([^(]+)\s*\(([^)]+)\)\.?$/)
+  if (match) {
+    const name = match[1].trim()
+    const childrenText = match[2]
+    const children = childrenText.split(',').map((c) => ({
+      name: c.trim().replace(/\.$/, ''),
+    }))
+    return { name, children }
+  }
+  return { name: text.replace(/\.$/, '') }
 }
 
 function extractMenuItemId(labelUrl: string): string {
@@ -176,10 +321,21 @@ export function parseLabelPage(html: string, itemId: string): FoodDetail {
 
   const allergens = parseAllergens(html)
 
-  const ingredientsMatch = html.match(
+  // Extract the ingredients list HTML (hierarchical structure) for better display
+  const ingredientsListMatch = html.match(
+    /<div class="ingred-list">\s*([\s\S]*?)\s*<\/div>\s*(?:<\/div>|$)/i,
+  )
+  // Fallback to paragraph if list not available
+  const ingredientsParagraphMatch = html.match(
     /<div class="ingred-paragraph">\s*<p>([^<]+)<\/p>/i,
   )
-  const ingredients = ingredientsMatch ? ingredientsMatch[1].trim() : ''
+
+  let ingredients: Ingredient[] = []
+  if (ingredientsListMatch) {
+    ingredients = parseIngredientsHtml(ingredientsListMatch[1])
+  } else if (ingredientsParagraphMatch) {
+    ingredients = parseIngredientsParagraph(ingredientsParagraphMatch[1])
+  }
 
   // The nutrition label uses specific CSS classes
 
