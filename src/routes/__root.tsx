@@ -35,7 +35,7 @@ interface MyRouterContext {
 const SITE_URL = 'https://bearbites.dreaming.codes'
 const SITE_NAME = 'Bear Bites'
 const SITE_TITLE =
-  'UCR Dining Menu - Bear Bites | UC Riverside Dining Hall Menus'
+  'UCR Dining Menu - Bear Bites'
 const SITE_DESCRIPTION =
   "View today's UCR dining menu for Glasgow, Lothian, and all UC Riverside dining halls. Filter by vegan, vegetarian, gluten-free options. Real-time meal hours, nutrition info, and save your favorite foods."
 const SITE_KEYWORDS =
@@ -366,7 +366,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
   // Fix iOS Safari stuck :active state - adding touchstart listener enables proper touch handling
   useEffect(() => {
-    document.addEventListener('touchstart', () => {}, { passive: true })
+    document.addEventListener('touchstart', () => { }, { passive: true })
   }, [])
 
   return (
