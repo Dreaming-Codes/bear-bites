@@ -96,8 +96,7 @@ function PWADevtoolsPanel({
     try {
       localStorage.removeItem(PROMPT_STORAGE_KEY)
       alert('Prompt state reset. Refresh the page to see effect.')
-    } catch {
-    }
+    } catch {}
   }
 
   const selectStyle: React.CSSProperties = {

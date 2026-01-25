@@ -64,8 +64,7 @@ async function handle({ request }: { request: Request }) {
       headers: request.headers,
     })
     userId = session?.user?.id
-  } catch (e) {
-  }
+  } catch (e) {}
 
   const { response } = await handler.handle(request, {
     prefix: '/api',

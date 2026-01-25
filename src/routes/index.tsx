@@ -61,8 +61,7 @@ export const Route = createFileRoute('/')({
   head: () => ({
     meta: [
       {
-        title:
-          "UCR Dining Menu - Bear Bites",
+        title: 'UCR Dining Menu - Bear Bites',
       },
       {
         name: 'description',
@@ -71,8 +70,7 @@ export const Route = createFileRoute('/')({
       },
       {
         property: 'og:title',
-        content:
-          "UCR Dining Menu - Bear Bites",
+        content: 'UCR Dining Menu - Bear Bites',
       },
       {
         property: 'og:description',
@@ -432,7 +430,7 @@ function HomePage() {
                 onClick={() =>
                   setSelectedLocation(
                     LOCATIONS.find((l) => l.id !== selectedLocation.id) ||
-                    LOCATIONS[0],
+                      LOCATIONS[0],
                   )
                 }
               >
@@ -481,8 +479,8 @@ function HomePage() {
                         ? 'bg-background text-foreground shadow-sm'
                         : 'text-muted-foreground',
                       !isAvailable &&
-                      !menuQuery.isLoading &&
-                      'opacity-40 cursor-not-allowed',
+                        !menuQuery.isLoading &&
+                        'opacity-40 cursor-not-allowed',
                     )}
                   >
                     <span className="flex items-center gap-1">
@@ -498,8 +496,8 @@ function HomePage() {
                       className={cn(
                         'text-xs',
                         isTodayDate &&
-                        isCurrentlyOpen &&
-                        'text-green-500 font-medium',
+                          isCurrentlyOpen &&
+                          'text-green-500 font-medium',
                         isTodayDate && isUpcoming && 'text-yellow-500',
                         isTodayDate && isPast && 'text-red-500/70',
                       )}
