@@ -1,17 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouterState } from '@tanstack/react-router'
 import posthog from 'posthog-js'
 import { PostHogProvider as PHProvider } from 'posthog-js/react'
-
-// Initialize PostHog only on the client
-if (typeof window !== 'undefined') {
-  posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY, {
-    api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
-    person_profiles: 'identified_only',
-    capture_pageview: false, // We'll capture page views manually with the router
-    capture_pageleave: true,
-  })
-}
 
 // Component that tracks page views on route changes
 function PostHogPageView() {
@@ -40,6 +30,26 @@ interface PostHogProviderProps {
 }
 
 export function PostHogProvider({ children }: PostHogProviderProps) {
+  const [isInitialized, setIsInitialized] = useState(false)
+
+  useEffect(() => {
+    // Initialize PostHog only on the client
+    if (typeof window !== 'undefined' && !posthog.__loaded) {
+      posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY, {
+        api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+        person_profiles: 'identified_only',
+        capture_pageview: false, // We'll capture page views manually with the router
+        capture_pageleave: true,
+      })
+    }
+    setIsInitialized(true)
+  }, [])
+
+  // During SSR and initial client render, just render children without PostHog
+  if (!isInitialized) {
+    return <>{children}</>
+  }
+
   return (
     <PHProvider client={posthog}>
       <PostHogPageView />
