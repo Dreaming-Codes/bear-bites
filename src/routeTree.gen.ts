@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as IngestSplatRouteImport } from './routes/ingest.$'
 import { Route as FoodItemIdRouteImport } from './routes/food.$itemId'
 import { Route as ApiSplatRouteImport } from './routes/api.$'
 import { Route as ApiRpcSplatRouteImport } from './routes/api.rpc.$'
@@ -36,6 +37,11 @@ const FavoritesRoute = FavoritesRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IngestSplatRoute = IngestSplatRouteImport.update({
+  id: '/ingest/$',
+  path: '/ingest/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FoodItemIdRoute = FoodItemIdRouteImport.update({
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/$': typeof ApiSplatRoute
   '/food/$itemId': typeof FoodItemIdRoute
+  '/ingest/$': typeof IngestSplatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
 }
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/$': typeof ApiSplatRoute
   '/food/$itemId': typeof FoodItemIdRoute
+  '/ingest/$': typeof IngestSplatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
 }
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/$': typeof ApiSplatRoute
   '/food/$itemId': typeof FoodItemIdRoute
+  '/ingest/$': typeof IngestSplatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
 }
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/api/$'
     | '/food/$itemId'
+    | '/ingest/$'
     | '/api/auth/$'
     | '/api/rpc/$'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/api/$'
     | '/food/$itemId'
+    | '/ingest/$'
     | '/api/auth/$'
     | '/api/rpc/$'
   id:
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/api/$'
     | '/food/$itemId'
+    | '/ingest/$'
     | '/api/auth/$'
     | '/api/rpc/$'
   fileRoutesById: FileRoutesById
@@ -130,6 +142,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiSplatRoute: typeof ApiSplatRoute
   FoodItemIdRoute: typeof FoodItemIdRoute
+  IngestSplatRoute: typeof IngestSplatRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiRpcSplatRoute: typeof ApiRpcSplatRoute
 }
@@ -162,6 +175,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ingest/$': {
+      id: '/ingest/$'
+      path: '/ingest/$'
+      fullPath: '/ingest/$'
+      preLoaderRoute: typeof IngestSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/food/$itemId': {
@@ -202,6 +222,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiSplatRoute: ApiSplatRoute,
   FoodItemIdRoute: FoodItemIdRoute,
+  IngestSplatRoute: IngestSplatRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiRpcSplatRoute: ApiRpcSplatRoute,
 }

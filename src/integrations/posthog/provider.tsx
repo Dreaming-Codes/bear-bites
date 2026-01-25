@@ -36,7 +36,8 @@ export function PostHogProvider({ children }: PostHogProviderProps) {
     // Initialize PostHog only on the client
     if (typeof window !== 'undefined' && !posthog.__loaded) {
       posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY, {
-        api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+        api_host: '/ingest', // Proxied through our own domain to avoid ad blockers
+        ui_host: 'https://us.posthog.com', // Required for PostHog toolbar to work
         person_profiles: 'identified_only',
         capture_pageview: false, // We'll capture page views manually with the router
         capture_pageleave: true,
