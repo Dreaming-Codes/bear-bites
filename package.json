@@ -52,6 +52,7 @@
     "kysely-d1": "^0.4.0",
     "lucide-react": "^0.561.0",
     "luxon": "^3.7.2",
+    "posthog-js": "^1.335.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwind-merge": "^3.0.2",
