@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
-import { X, Download } from 'lucide-react'
-import { usePWAInstall, usePWADevContext } from '@/hooks/usePWAInstall'
+import { useEffect, useState } from 'react'
+import { Download, X } from 'lucide-react'
+import { usePWADevContext, usePWAInstall } from '@/hooks/usePWAInstall'
 import { InstallInstructions } from '@/components/InstallInstructions'
 import { cn } from '@/lib/utils'
 

@@ -19,7 +19,7 @@ export const LocationSchema = z.object({
   name: z.string(), // locationName from FoodPro
 })
 
-export const LOCATIONS: z.infer<typeof LocationSchema>[] = [
+export const LOCATIONS: Array<z.infer<typeof LocationSchema>> = [
   { id: '02', name: 'Lothian' },
   { id: '03', name: 'Glasgow' },
 ]
@@ -130,7 +130,7 @@ function parseTimeToMinutes(timeStr: string): number {
 }
 
 // Order of meals throughout the day
-const MEAL_ORDER: Meal[] = ['breakfast', 'brunch', 'lunch', 'dinner']
+const MEAL_ORDER: Array<Meal> = ['breakfast', 'brunch', 'lunch', 'dinner']
 
 export type MealStatus = 'open' | 'upcoming' | 'closed'
 
@@ -192,7 +192,7 @@ export function getCurrentOrNextMeal(
   return 'dinner'
 }
 
-export function getAvailableMeals(locationId: string, date: Date): Meal[] {
+export function getAvailableMeals(locationId: string, date: Date): Array<Meal> {
   return MEAL_ORDER.filter(
     (meal) => getMealHours(locationId, meal, date) !== null,
   )
@@ -221,7 +221,7 @@ export function getApiMealKey(meal: Meal, date: Date | string): Meal {
 // Check if a display meal has data available (considering brunch/lunch mapping)
 export function hasMealData(
   meal: Meal,
-  meals: Record<string, unknown[] | undefined>,
+  meals: Record<string, Array<unknown> | undefined>,
   date: Date,
 ): boolean {
   const apiKey = getApiMealKey(meal, date)
@@ -293,7 +293,7 @@ export const NutritionSchema = z.object({
 export interface Ingredient {
   name: string
   isNote?: boolean // For items like "*Organic"
-  children?: Ingredient[]
+  children?: Array<Ingredient>
 }
 
 export const IngredientSchema: z.ZodType<Ingredient> = z.lazy(() =>

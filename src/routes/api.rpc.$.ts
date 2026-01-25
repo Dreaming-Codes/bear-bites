@@ -12,7 +12,7 @@ async function handle({ request }: { request: Request }) {
   let userId: string | undefined
 
   try {
-    const auth = createAuth(env as Cloudflare.Env)
+    const auth = createAuth(env)
     const session = await auth.api.getSession({
       headers: request.headers,
     })

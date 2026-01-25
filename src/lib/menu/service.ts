@@ -1,12 +1,12 @@
+import { nowInLA, toJSDate } from '../timezone'
 import {
-  parseShortMenu,
-  parseLabelPage,
   buildMenuUrl,
   formatDateISO,
+  parseLabelPage,
+  parseShortMenu,
 } from './scraper'
-import type { DayMenu, FoodDetail, Location } from './schemas'
 import { LOCATIONS } from './schemas'
-import { nowInLA, toJSDate } from '../timezone'
+import type { DayMenu, FoodDetail, Location } from './schemas'
 
 const MENU_CACHE_TTL_SECONDS = 60 * 60 * 24 // 1 day for menu data
 const FOOD_LABEL_CACHE_TTL_SECONDS = 60 * 60 * 24 * 7 // 1 week for food labels
@@ -30,7 +30,7 @@ export class MenuService {
     this.kv = kv
   }
 
-  getLocations(): Location[] {
+  getLocations(): Array<Location> {
     return LOCATIONS
   }
 
@@ -112,8 +112,8 @@ export class MenuService {
     locationId: string,
     startDate: Date,
     days: number,
-  ): Promise<(DayMenu | null)[]> {
-    const promises: Promise<DayMenu | null>[] = []
+  ): Promise<Array<DayMenu | null>> {
+    const promises: Array<Promise<DayMenu | null>> = []
 
     for (let i = 0; i < days; i++) {
       const date = new Date(startDate)
@@ -147,8 +147,8 @@ export class MenuService {
     const maxEmptyDays = 3
     const maxSearchDays = 30 // Safety limit
 
-    const forwardDates: Date[] = []
-    const backwardDates: Date[] = []
+    const forwardDates: Array<Date> = []
+    const backwardDates: Array<Date> = []
 
     for (let i = 1; i <= maxSearchDays; i++) {
       forwardDates.push(toJSDate(todayDT.plus({ days: i })))

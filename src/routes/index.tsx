@@ -1,50 +1,50 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useMemo, useCallback } from 'react'
+import { useCallback, useMemo, useState  } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 import {
+  Calendar,
   ChevronLeft,
   ChevronRight,
-  MapPin,
   Filter,
   Loader2,
-  Calendar,
+  MapPin,
   XCircle,
 } from 'lucide-react'
+import { DateTime } from 'luxon'
+import type {Meal, MenuItem} from '@/lib/menu/schemas';
 import { orpc } from '@/orpc/client'
 import {
   LOCATIONS,
-  type Meal,
-  type MenuItem,
-  getMealHours,
+  
+  
   formatMealHours,
-  getMealStatus,
-  getCurrentOrNextMeal,
   getApiMealKey,
-  hasMealData,
-  isLocationClosedForDay,
   getAvailableMeals,
+  getCurrentOrNextMeal,
+  getMealHours,
+  getMealStatus,
+  hasMealData,
+  isLocationClosedForDay
 } from '@/lib/menu/schemas'
 import {
-  PageWrapper,
   Container,
-  GlassCard,
-  GlassButton,
-  FilterModal,
-  QuickFilterBar,
   DEFAULT_FILTERS,
+  FilterModal,
+  GlassButton,
+  GlassCard,
+  PageWrapper,
+  QuickFilterBar,
 } from '@/components/bear-bites'
 import { FoodGrid, StationGroup } from '@/components/bear-bites/FoodCard'
 import { cn } from '@/lib/utils'
 import { useFavorites } from '@/hooks/useFavorites'
 import { usePersistedFilters } from '@/hooks/usePersistedFilters'
-import { useState } from 'react'
-import { DateTime } from 'luxon'
 import {
   LA_TIMEZONE,
+  formatDateLA,
   nowInLA,
   parseDateInLA,
-  formatDateLA,
   toJSDate,
 } from '@/lib/timezone'
 
@@ -119,7 +119,7 @@ function getCurrentMeal(locationId: string): Meal {
   return getCurrentOrNextMeal(locationId, now)
 }
 
-const MEALS: { id: Meal; label: string }[] = [
+const MEALS: Array<{ id: Meal; label: string }> = [
   { id: 'breakfast', label: 'Breakfast' },
   { id: 'brunch', label: 'Brunch' },
   { id: 'lunch', label: 'Lunch' },
@@ -261,7 +261,7 @@ function HomePage() {
   }, [mealItems, favoriteIds])
 
   const stationGroups = useMemo(() => {
-    const groups: Record<string, MenuItem[]> = {}
+    const groups: Record<string, Array<MenuItem>> = {}
     for (const item of mealItems) {
       if (!groups[item.station]) {
         groups[item.station] = []
@@ -275,7 +275,7 @@ function HomePage() {
     const meals = menuQuery.data?.meals
     if (!meals) return new Set<Meal>()
     // Check which display meals have data (considering brunch/lunch mapping)
-    const allMeals: Meal[] = ['breakfast', 'brunch', 'lunch', 'dinner']
+    const allMeals: Array<Meal> = ['breakfast', 'brunch', 'lunch', 'dinner']
     return new Set(
       allMeals.filter((meal) => hasMealData(meal, meals, selectedDate)),
     )

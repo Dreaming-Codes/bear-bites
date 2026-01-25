@@ -23,7 +23,7 @@ function loadFromStorage(): DietaryFilters {
         vegan: parsed.vegan ?? false,
         vegetarian: parsed.vegetarian ?? false,
         glutenFree: parsed.glutenFree ?? false,
-        excludeAllergens: (parsed.excludeAllergens ?? []) as Allergen[],
+        excludeAllergens: (parsed.excludeAllergens ?? []) as Array<Allergen>,
       }
     }
   } catch (e) {

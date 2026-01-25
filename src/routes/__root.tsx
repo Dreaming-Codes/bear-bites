@@ -1,24 +1,15 @@
 import {
   HeadContent,
+  Link,
   Outlet,
   Scripts,
   createRootRouteWithContext,
-  Link,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { Home } from 'lucide-react'
 import { useEffect } from 'react'
 
-import {
-  BottomNav,
-  PageWrapper,
-  Container,
-  GlassCard,
-  GlassButton,
-} from '@/components/bear-bites'
-import { ThemeProvider } from '@/hooks/useTheme'
-import { useServiceWorker } from '@/hooks/useServiceWorker'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import PWADevtools, { PWADevProvider } from '../integrations/pwa/provider'
@@ -28,6 +19,15 @@ import { PWAInstallPrompt } from '../components/PWAInstallPrompt'
 import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
+import { useServiceWorker } from '@/hooks/useServiceWorker'
+import { ThemeProvider } from '@/hooks/useTheme'
+import {
+  BottomNav,
+  Container,
+  GlassButton,
+  GlassCard,
+  PageWrapper,
+} from '@/components/bear-bites'
 
 interface MyRouterContext {
   queryClient: QueryClient

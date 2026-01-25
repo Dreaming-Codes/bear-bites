@@ -1,8 +1,8 @@
 import { Link } from '@tanstack/react-router'
 import { Heart } from 'lucide-react'
-import type { MenuItem } from '@/lib/menu/schemas'
 import { GlassCard } from './GlassCard'
-import { DietaryBadge, AllergenBadge } from './DietaryBadges'
+import { AllergenBadge, DietaryBadge } from './DietaryBadges'
+import type { MenuItem } from '@/lib/menu/schemas'
 import { cn } from '@/lib/utils'
 
 interface FoodCardProps {
@@ -81,7 +81,7 @@ export function FoodCard({
 }
 
 interface FoodGridProps {
-  items: MenuItem[]
+  items: Array<MenuItem>
   date: string
   locationId: string
   locationName?: string
@@ -136,7 +136,7 @@ export function FoodGrid({
 
 interface StationGroupProps {
   station: string
-  items: MenuItem[]
+  items: Array<MenuItem>
   date: string
   locationId: string
   locationName?: string

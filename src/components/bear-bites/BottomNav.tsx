@@ -1,5 +1,5 @@
 import { Link, useRouterState } from '@tanstack/react-router'
-import { Home, Heart, User } from 'lucide-react'
+import { Heart, Home, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [

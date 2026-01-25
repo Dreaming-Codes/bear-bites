@@ -1,12 +1,12 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { Heart, Loader2, Trash2, MapPin } from 'lucide-react'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { Heart, Loader2, MapPin, Trash2 } from 'lucide-react'
 import {
-  PageWrapper,
   Container,
-  GlassCard,
   GlassButton,
+  GlassCard,
+  PageWrapper,
 } from '@/components/bear-bites'
-import { useSession, signIn } from '@/lib/auth-client'
+import { signIn, useSession } from '@/lib/auth-client'
 import { useFavorites } from '@/hooks/useFavorites'
 import { cn } from '@/lib/utils'
 import { LOCATIONS } from '@/lib/menu/schemas'

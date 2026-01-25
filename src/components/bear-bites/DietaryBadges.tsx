@@ -1,5 +1,5 @@
-import { Leaf, Wheat, AlertTriangle } from 'lucide-react'
-import type { DietaryTag, Allergen } from '@/lib/menu/schemas'
+import { AlertTriangle, Leaf, Wheat } from 'lucide-react'
+import type { Allergen, DietaryTag } from '@/lib/menu/schemas'
 import { cn } from '@/lib/utils'
 
 interface DietaryBadgeProps {
@@ -76,7 +76,7 @@ export function AllergenBadge({
 }
 
 interface DietaryTagsProps {
-  tags: DietaryTag[]
+  tags: Array<DietaryTag>
   size?: 'sm' | 'md'
   className?: string
 }
@@ -98,7 +98,7 @@ export function DietaryTags({
 }
 
 interface AllergenListProps {
-  allergens: Allergen[]
+  allergens: Array<Allergen>
   size?: 'sm' | 'md'
   showLabels?: boolean
   className?: string
