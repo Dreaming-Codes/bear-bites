@@ -28,4 +28,3 @@ export const favoritesCollection = createCollection(
     schema: FavoriteSchema,
   }),
 )
-

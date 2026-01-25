@@ -16,7 +16,7 @@ import {
 } from './favorites'
 
 export default {
-    menu: {
+  menu: {
     getLocations,
     getMenu,
     getMenusForWeek,
