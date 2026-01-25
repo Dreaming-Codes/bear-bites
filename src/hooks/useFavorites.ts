@@ -6,9 +6,9 @@ import {
   useSyncExternalStore,
 } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type {Favorite} from '@/db-collections';
+import type { Favorite } from '@/db-collections'
 import { useSession } from '@/lib/auth-client'
-import {  favoritesCollection } from '@/db-collections'
+import { favoritesCollection } from '@/db-collections'
 import { orpc } from '@/orpc/client'
 
 // Track if we've synced for this session (module-level to persist across hook instances)
@@ -30,15 +30,11 @@ function useSSRSafeFavoritesQuery(): Array<Favorite> {
     }
 
     const subscription = favoritesCollection.subscribeChanges(() => {
-      dataRef.current = Array.from(
-        favoritesCollection.state.values(),
-      )
+      dataRef.current = Array.from(favoritesCollection.state.values())
       onStoreChange()
     })
 
-    dataRef.current = Array.from(
-      favoritesCollection.state.values(),
-    )
+    dataRef.current = Array.from(favoritesCollection.state.values())
 
     return () => {
       subscription.unsubscribe()
@@ -145,7 +141,7 @@ export function useFavorites() {
         addedAt: f.addedAt,
       })),
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [isAuthenticated])
 
   const favoriteIds = useMemo(() => {
