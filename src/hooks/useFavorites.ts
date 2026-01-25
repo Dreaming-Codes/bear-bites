@@ -5,23 +5,24 @@ import {
   useRef,
   useSyncExternalStore,
 } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import type {Favorite} from '@/db-collections';
 import { useSession } from '@/lib/auth-client'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { favoritesCollection, type Favorite } from '@/db-collections'
+import {  favoritesCollection } from '@/db-collections'
 import { orpc } from '@/orpc/client'
 
 // Track if we've synced for this session (module-level to persist across hook instances)
 let hasInitialSynced = false
 
 // Cached empty array for SSR to avoid infinite loop
-const EMPTY_FAVORITES: Favorite[] = []
+const EMPTY_FAVORITES: Array<Favorite> = []
 
 /**
  * SSR-safe wrapper for useLiveQuery that provides proper getServerSnapshot
  * This avoids the "Missing getServerSnapshot" error during SSR
  */
-function useSSRSafeFavoritesQuery(): Favorite[] {
-  const dataRef = useRef<Favorite[]>(EMPTY_FAVORITES)
+function useSSRSafeFavoritesQuery(): Array<Favorite> {
+  const dataRef = useRef<Array<Favorite>>(EMPTY_FAVORITES)
 
   const subscribe = useCallback((onStoreChange: () => void) => {
     if (typeof window === 'undefined') {
@@ -31,13 +32,13 @@ function useSSRSafeFavoritesQuery(): Favorite[] {
     const subscription = favoritesCollection.subscribeChanges(() => {
       dataRef.current = Array.from(
         favoritesCollection.state.values(),
-      ) as Favorite[]
+      )
       onStoreChange()
     })
 
     dataRef.current = Array.from(
       favoritesCollection.state.values(),
-    ) as Favorite[]
+    )
 
     return () => {
       subscription.unsubscribe()

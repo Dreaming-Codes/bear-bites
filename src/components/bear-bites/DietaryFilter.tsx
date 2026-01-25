@@ -1,16 +1,16 @@
 import { useState } from 'react'
-import { X, Check } from 'lucide-react'
-import type { DietaryTag, Allergen } from '@/lib/menu/schemas'
-import { GlassCard, GlassButton } from './GlassCard'
+import { Check, X } from 'lucide-react'
+import { GlassButton, GlassCard } from './GlassCard'
+import type { Allergen, DietaryTag } from '@/lib/menu/schemas'
 import { cn } from '@/lib/utils'
 
-const DIETARY_TAGS: { id: DietaryTag; label: string; emoji: string }[] = [
+const DIETARY_TAGS: Array<{ id: DietaryTag; label: string; emoji: string }> = [
   { id: 'vegan', label: 'Vegan', emoji: '🌱' },
   { id: 'vegetarian', label: 'Vegetarian', emoji: '🥗' },
   { id: 'gluten-free', label: 'Gluten-Free', emoji: '🌾' },
 ]
 
-const ALLERGENS: { id: Allergen; label: string; emoji: string }[] = [
+const ALLERGENS: Array<{ id: Allergen; label: string; emoji: string }> = [
   { id: 'milk', label: 'Milk', emoji: '🥛' },
   { id: 'eggs', label: 'Eggs', emoji: '🥚' },
   { id: 'fish', label: 'Fish', emoji: '🐟' },
@@ -26,7 +26,7 @@ export interface DietaryFilters {
   vegan: boolean
   vegetarian: boolean
   glutenFree: boolean
-  excludeAllergens: Allergen[]
+  excludeAllergens: Array<Allergen>
 }
 
 export const DEFAULT_FILTERS: DietaryFilters = {

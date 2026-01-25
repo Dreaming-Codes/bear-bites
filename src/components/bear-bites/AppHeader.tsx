@@ -1,7 +1,7 @@
 import { Link, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
-import { Menu, X, Home, Heart, Settings, User, ChevronLeft } from 'lucide-react'
-import { useSession, signIn, signOut } from '@/lib/auth-client'
+import { ChevronLeft, Heart, Home, Menu, Settings, User, X } from 'lucide-react'
+import { signIn, signOut, useSession } from '@/lib/auth-client'
 
 interface AppHeaderProps {
   title?: string

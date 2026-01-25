@@ -1,18 +1,18 @@
 import {
+  getDateBounds,
+  getFilteredMenu,
+  getFoodDetail,
   getLocations,
   getMenu,
   getMenusForWeek,
-  getFoodDetail,
   searchMenuItems,
-  getFilteredMenu,
-  getDateBounds,
 } from './menu'
 import {
-  getFavorites,
   addFavorite,
+  getFavorites,
+  isFavorite,
   removeFavorite,
   syncFavorites,
-  isFavorite,
 } from './favorites'
 
 export default {

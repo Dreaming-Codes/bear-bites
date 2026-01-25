@@ -2,19 +2,19 @@ import { os } from '@orpc/server'
 import { z } from 'zod'
 import { env } from 'cloudflare:workers'
 import {
-  createMenuService,
-  LocationSchema,
-  MenuItemSchema,
   DayMenuSchema,
   FoodDetailSchema,
-  MealSchema,
   LOCATIONS,
+  LocationSchema,
+  MealSchema,
+  MenuItemSchema,
+  createMenuService,
 } from '@/lib/menu'
 import { buildLabelUrl } from '@/lib/menu/scraper'
 import { parseDateInLA, toJSDate } from '@/lib/timezone'
 
 function getMenuService() {
-  return createMenuService((env as Cloudflare.Env).MENU_CACHE)
+  return createMenuService((env).MENU_CACHE)
 }
 
 export const getLocations = os
@@ -105,9 +105,9 @@ export const searchMenuItems = os
     }
 
     const query = input.query.toLowerCase()
-    const results: (z.infer<typeof MenuItemSchema> & {
+    const results: Array<z.infer<typeof MenuItemSchema> & {
       meal: z.infer<typeof MealSchema>
-    })[] = []
+    }> = []
 
     for (const [mealName, items] of Object.entries(menu.meals)) {
       for (const item of items) {

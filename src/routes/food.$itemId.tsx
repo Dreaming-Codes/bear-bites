@@ -1,20 +1,20 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
-import { Loader2, Heart, ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Heart, Loader2 } from 'lucide-react'
+import type { Nutrition } from '@/lib/menu/schemas'
 import { orpc } from '@/orpc/client'
 import {
-  PageWrapper,
   Container,
-  GlassCard,
   GlassButton,
+  GlassCard,
   IngredientsList,
+  PageWrapper,
 } from '@/components/bear-bites'
 import {
-  DietaryTags,
   AllergenList,
+  DietaryTags,
 } from '@/components/bear-bites/DietaryBadges'
-import type { Nutrition } from '@/lib/menu/schemas'
 import { cn } from '@/lib/utils'
 import { useFavorites } from '@/hooks/useFavorites'
 import { LOCATIONS } from '@/lib/menu/schemas'

@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { ChevronRight } from 'lucide-react'
+import { GlassCard } from './GlassCard'
 import type { Ingredient } from '@/lib/menu/schemas'
 import { cn } from '@/lib/utils'
-import { GlassCard } from './GlassCard'
 
 interface IngredientsListProps {
-  ingredients: Ingredient[]
+  ingredients: Array<Ingredient>
 }
 
 /**

@@ -16,7 +16,7 @@ const D1FavoriteSchema = z.object({
 type D1Favorite = z.infer<typeof D1FavoriteSchema>
 
 function getDB() {
-  return (env as Cloudflare.Env).DB
+  return (env).DB
 }
 
 function generateId(): string {
@@ -165,7 +165,7 @@ export const syncFavorites = os
     }
 
     const db = getDB()
-    const synced: { localId: string; cloudId: string }[] = []
+    const synced: Array<{ localId: string; cloudId: string }> = []
 
     for (const fav of input.favorites) {
       const id = generateId()

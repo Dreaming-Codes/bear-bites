@@ -1,13 +1,14 @@
+import type {Browser, InstallMethod, PWADevOverrides, Platform} from '@/hooks/usePWAInstall';
 import {
-  type Platform,
-  type Browser,
-  type InstallMethod,
-  type PWADevOverrides,
-  detectPlatform,
+  
+  
+  
+  
+  detectPlatform
 } from '@/hooks/usePWAInstall'
 
-const PLATFORMS: Platform[] = ['ios', 'android', 'desktop', 'unknown']
-const BROWSERS: Browser[] = [
+const PLATFORMS: Array<Platform> = ['ios', 'android', 'desktop', 'unknown']
+const BROWSERS: Array<Browser> = [
   'safari',
   'chrome',
   'firefox',
@@ -16,7 +17,7 @@ const BROWSERS: Browser[] = [
   'opera',
   'other',
 ]
-const INSTALL_METHODS: InstallMethod[] = [
+const INSTALL_METHODS: Array<InstallMethod> = [
   'native',
   'ios-safari',
   'ios-other',
@@ -33,7 +34,7 @@ interface PWADevtoolsPanelProps {
   forceShowPrompt: () => void
 }
 
-const PRESETS: { name: string; overrides: PWADevOverrides }[] = [
+const PRESETS: Array<{ name: string; overrides: PWADevOverrides }> = [
   {
     name: 'iOS Safari',
     overrides: {

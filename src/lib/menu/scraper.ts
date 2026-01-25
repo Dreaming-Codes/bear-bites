@@ -1,3 +1,4 @@
+import { formatDateLA } from '../timezone'
 import type {
   Allergen,
   DayMenu,
@@ -8,7 +9,6 @@ import type {
   MenuItem,
   Nutrition,
 } from './schemas'
-import { formatDateLA } from '../timezone'
 
 const FOODPRO_BASE_URL = 'https://foodpro.ucr.edu/foodpro'
 
@@ -30,8 +30,8 @@ const DIETARY_MAP: Record<string, DietaryTag> = {
   'gf_.png': 'gluten-free',
 }
 
-function parseAllergens(html: string): Allergen[] {
-  const allergens: Allergen[] = []
+function parseAllergens(html: string): Array<Allergen> {
+  const allergens: Array<Allergen> = []
   const regex = /AllergenImages\/([^"']+)/g
   let match: RegExpExecArray | null
 
@@ -45,8 +45,8 @@ function parseAllergens(html: string): Allergen[] {
   return [...new Set(allergens)] // Remove duplicates
 }
 
-function parseDietaryTags(html: string): DietaryTag[] {
-  const tags: DietaryTag[] = []
+function parseDietaryTags(html: string): Array<DietaryTag> {
+  const tags: Array<DietaryTag> = []
   const regex = /LegendImages\/([^"']+)/g
   let match: RegExpExecArray | null
 
@@ -64,8 +64,8 @@ function parseDietaryTags(html: string): DietaryTag[] {
  * Parse HTML ingredient list into structured data
  * Handles nested ul/li structure from FoodPro
  */
-function parseIngredientsHtml(html: string): Ingredient[] {
-  const ingredients: Ingredient[] = []
+function parseIngredientsHtml(html: string): Array<Ingredient> {
+  const ingredients: Array<Ingredient> = []
 
   // Find the content of the outer <ul>
   const ulMatch = html.match(/<ul>([\s\S]*)<\/ul>/i)
@@ -156,8 +156,8 @@ function parseSingleLi(content: string): Ingredient | null {
  * Parse ingredients from paragraph text (fallback for older format)
  * Splits by comma while respecting parentheses for sub-ingredients
  */
-function parseIngredientsParagraph(text: string): Ingredient[] {
-  const ingredients: Ingredient[] = []
+function parseIngredientsParagraph(text: string): Array<Ingredient> {
+  const ingredients: Array<Ingredient> = []
   let current = ''
   let depth = 0
 
@@ -215,7 +215,7 @@ export function parseShortMenu(
   locationName: string,
   dateStr: string,
 ): DayMenu {
-  const meals: Partial<Record<Meal, MenuItem[]>> = {}
+  const meals: Partial<Record<Meal, Array<MenuItem>>> = {}
 
   // Split by meal headers to process each meal section
   const mealSections = html.split(/<h3 class="shortmenumeals">/i)
@@ -227,7 +227,7 @@ export function parseShortMenu(
     if (!mealNameMatch) continue
 
     const mealName = mealNameMatch[1].toLowerCase() as Meal
-    const items: MenuItem[] = []
+    const items: Array<MenuItem> = []
 
     // Find the end of this meal section (next meal header or end of main content)
     // Look for the closing table or next section
@@ -238,7 +238,7 @@ export function parseShortMenu(
     const stationRegex = /<div class="shortmenucats">--\s*(.+?)\s*--<\/div>/gi
     let stationMatch: RegExpExecArray | null
 
-    const stations: { name: string; position: number }[] = []
+    const stations: Array<{ name: string; position: number }> = []
     while ((stationMatch = stationRegex.exec(mealContent)) !== null) {
       stations.push({
         name: stationMatch[1].trim(),
@@ -331,7 +331,7 @@ export function parseLabelPage(html: string, itemId: string): FoodDetail {
     /<div class="ingred-paragraph">\s*<p>([^<]+)<\/p>/i,
   )
 
-  let ingredients: Ingredient[] = []
+  let ingredients: Array<Ingredient> = []
   if (ingredientsListMatch) {
     ingredients = parseIngredientsHtml(ingredientsListMatch[1])
   } else if (ingredientsParagraphMatch) {

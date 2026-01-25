@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { User, LogOut, Moon, Sun, Monitor } from 'lucide-react'
-import { PageWrapper, Container, GlassCard } from '@/components/bear-bites'
-import { useSession, signIn, signOut } from '@/lib/auth-client'
+import { LogOut, Monitor, Moon, Sun, User } from 'lucide-react'
+import { Container, GlassCard, PageWrapper } from '@/components/bear-bites'
+import { signIn, signOut, useSession } from '@/lib/auth-client'
 import { useTheme } from '@/hooks/useTheme'
 import { usePWAInstall } from '@/hooks/usePWAInstall'
 import { InstallInstructions } from '@/components/InstallInstructions'
@@ -66,7 +66,7 @@ function ThemeSelector({
   value: ThemeOption
   onChange: (value: ThemeOption) => void
 }) {
-  const options: { value: ThemeOption; icon: typeof Sun; label: string }[] = [
+  const options: Array<{ value: ThemeOption; icon: typeof Sun; label: string }> = [
     { value: 'light', icon: Sun, label: 'Light' },
     { value: 'dark', icon: Moon, label: 'Dark' },
     { value: 'system', icon: Monitor, label: 'Auto' },
