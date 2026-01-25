@@ -22,6 +22,7 @@ import { useServiceWorker } from '@/hooks/useServiceWorker'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import PWADevtools, { PWADevProvider } from '../integrations/pwa/provider'
+import { PostHogProvider } from '../integrations/posthog/provider'
 import { PWAInstallPrompt } from '../components/PWAInstallPrompt'
 
 import appCss from '../styles.css?url'
@@ -34,8 +35,7 @@ interface MyRouterContext {
 
 const SITE_URL = 'https://bearbites.dreaming.codes'
 const SITE_NAME = 'Bear Bites'
-const SITE_TITLE =
-  'UCR Dining Menu - Bear Bites'
+const SITE_TITLE = 'UCR Dining Menu - Bear Bites'
 const SITE_DESCRIPTION =
   "View today's UCR dining menu for Glasgow, Lothian, and all UC Riverside dining halls. Filter by vegan, vegetarian, gluten-free options. Real-time meal hours, nutrition info, and save your favorite foods."
 const SITE_KEYWORDS =
@@ -366,7 +366,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
   // Fix iOS Safari stuck :active state - adding touchstart listener enables proper touch handling
   useEffect(() => {
-    document.addEventListener('touchstart', () => { }, { passive: true })
+    document.addEventListener('touchstart', () => {}, { passive: true })
   }, [])
 
   return (
@@ -375,26 +375,28 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="bg-background text-foreground">
-        <PWADevProvider>
-          <ThemeProvider>
-            {children}
-            <BottomNav />
-            <PWAInstallPrompt />
-          </ThemeProvider>
-          <TanStackDevtools
-            config={{
-              position: 'bottom-right',
-            }}
-            plugins={[
-              {
-                name: 'Tanstack Router',
-                render: <TanStackRouterDevtoolsPanel />,
-              },
-              TanStackQueryDevtools,
-              PWADevtools,
-            ]}
-          />
-        </PWADevProvider>
+        <PostHogProvider>
+          <PWADevProvider>
+            <ThemeProvider>
+              {children}
+              <BottomNav />
+              <PWAInstallPrompt />
+            </ThemeProvider>
+            <TanStackDevtools
+              config={{
+                position: 'bottom-right',
+              }}
+              plugins={[
+                {
+                  name: 'Tanstack Router',
+                  render: <TanStackRouterDevtoolsPanel />,
+                },
+                TanStackQueryDevtools,
+                PWADevtools,
+              ]}
+            />
+          </PWADevProvider>
+        </PostHogProvider>
         <Scripts />
       </body>
     </html>
