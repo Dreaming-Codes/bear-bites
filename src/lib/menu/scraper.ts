@@ -363,7 +363,7 @@ export function parseLabelPage(html: string, itemId: string): FoodDetail {
   // Helper to extract nutrient values
   // The HTML structure is: <div class="nf-row"><div><h4>Name</h4> Value</div><div class="nf-right-value">DV%</div></div>
   const extractNutrient = (
-    name: string,
+    nutrientName: string,
     unit: string,
   ): { value: number; dv: number } => {
     let value = 0
@@ -372,7 +372,7 @@ export function parseLabelPage(html: string, itemId: string): FoodDetail {
     // Pattern to find: Name</h4> VALUE unit ... DV%
     // This captures the value right after the nutrient name and the DV% that follows
     const pattern = new RegExp(
-      `<h4[^>]*>${name}</h4>\\s*(\\d+(?:\\.\\d+)?)\\s*${unit}[\\s\\S]*?class="nf-right-value"[^>]*>(\\d+(?:\\.\\d+)?)%`,
+      `<h4[^>]*>${nutrientName}</h4>\\s*(\\d+(?:\\.\\d+)?)\\s*${unit}[\\s\\S]*?class="nf-right-value"[^>]*>(\\d+(?:\\.\\d+)?)%`,
       'i',
     )
     const match = html.match(pattern)
@@ -384,7 +384,7 @@ export function parseLabelPage(html: string, itemId: string): FoodDetail {
       // Try alternate pattern for lower section nutrients (Vitamin D, Calcium, etc.)
       // Structure: <h4>Name</h4> VALUEunit</div><div class="nf-right">DV%</div>
       const altPattern = new RegExp(
-        `<h4>${name}</h4>\\s*(\\d+(?:\\.\\d+)?)${unit}</div><div class="nf-right">(\\d+(?:\\.\\d+)?)%`,
+        `<h4>${nutrientName}</h4>\\s*(\\d+(?:\\.\\d+)?)${unit}</div><div class="nf-right">(\\d+(?:\\.\\d+)?)%`,
         'i',
       )
       const altMatch = html.match(altPattern)
