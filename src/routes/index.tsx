@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useCallback, useMemo, useState  } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 import {
@@ -12,12 +12,10 @@ import {
   XCircle,
 } from 'lucide-react'
 import { DateTime } from 'luxon'
-import type {Meal, MenuItem} from '@/lib/menu/schemas';
+import type { Meal, MenuItem } from '@/lib/menu/schemas'
 import { orpc } from '@/orpc/client'
 import {
   LOCATIONS,
-  
-  
   formatMealHours,
   getApiMealKey,
   getAvailableMeals,
@@ -25,7 +23,7 @@ import {
   getMealHours,
   getMealStatus,
   hasMealData,
-  isLocationClosedForDay
+  isLocationClosedForDay,
 } from '@/lib/menu/schemas'
 import {
   Container,
@@ -288,10 +286,10 @@ function HomePage() {
   )
 
   const minDate = dateBoundsQuery.data?.minDate
-    ? new Date(dateBoundsQuery.data.minDate + 'T12:00:00')
+    ? toJSDate(parseDateInLA(dateBoundsQuery.data.minDate))
     : null
   const maxDate = dateBoundsQuery.data?.maxDate
-    ? new Date(dateBoundsQuery.data.maxDate + 'T12:00:00')
+    ? toJSDate(parseDateInLA(dateBoundsQuery.data.maxDate))
     : null
 
   const canGoBack = minDate ? selectedDate > minDate : true
@@ -301,14 +299,36 @@ function HomePage() {
     if (!canGoBack) return
     const newDate = new Date(selectedDate)
     newDate.setDate(newDate.getDate() - 1)
-    setSelectedDate(newDate)
+    const availableMealsAtNewDate = getAvailableMeals(
+      selectedLocation.id,
+      newDate,
+    )
+    const currentMealAvailable = availableMealsAtNewDate.includes(selectedMeal)
+
+    if (currentMealAvailable) {
+      setSelectedDate(newDate)
+    } else {
+      const bestMeal = getCurrentOrNextMeal(selectedLocation.id, newDate)
+      updateSearch({ date: formatDate(newDate), meal: bestMeal })
+    }
   }
 
   const goToNextDay = () => {
     if (!canGoForward) return
     const newDate = new Date(selectedDate)
     newDate.setDate(newDate.getDate() + 1)
-    setSelectedDate(newDate)
+    const availableMealsAtNewDate = getAvailableMeals(
+      selectedLocation.id,
+      newDate,
+    )
+    const currentMealAvailable = availableMealsAtNewDate.includes(selectedMeal)
+
+    if (currentMealAvailable) {
+      setSelectedDate(newDate)
+    } else {
+      const bestMeal = getCurrentOrNextMeal(selectedLocation.id, newDate)
+      updateSearch({ date: formatDate(newDate), meal: bestMeal })
+    }
   }
 
   const goToToday = () => {
