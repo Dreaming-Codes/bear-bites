@@ -1,4 +1,5 @@
-import { formatDateLA } from '../timezone'
+import { DateTime } from 'luxon'
+import { formatDateLA, LA_TIMEZONE } from '../timezone'
 import type {
   Allergen,
   DayMenu,
@@ -508,9 +509,10 @@ export function buildMenuUrl(
   locationName: string,
   date: Date,
 ): string {
-  const month = date.getMonth() + 1
-  const day = date.getDate()
-  const year = date.getFullYear()
+  const dt = DateTime.fromJSDate(date).setZone(LA_TIMEZONE)
+  const month = dt.month
+  const day = dt.day
+  const year = dt.year
   const dateStr = `${month}/${day}/${year}`
 
   return `${FOODPRO_BASE_URL}/shortmenu.aspx?sName=University+of+California%2c+Riverside+Dining+Services&locationNum=${locationId}&locationName=${encodeURIComponent(locationName)}&naFlag=1&WeeksMenus=This+Week%27s+Menus&myaction=read&dtdate=${encodeURIComponent(dateStr)}`
@@ -526,9 +528,10 @@ export function buildLabelUrl(
   locationName: string,
   date: Date,
 ): string {
-  const month = date.getMonth() + 1
-  const day = date.getDate()
-  const year = date.getFullYear()
+  const dt = DateTime.fromJSDate(date).setZone(LA_TIMEZONE)
+  const month = dt.month
+  const day = dt.day
+  const year = dt.year
   const dateStr = `${month}/${day}/${year}`
 
   return `${FOODPRO_BASE_URL}/label.aspx?locationNum=${locationId}&locationName=${encodeURIComponent(locationName)}&dtdate=${encodeURIComponent(dateStr)}&RecNumAndPort=${encodeURIComponent(itemId)}`
