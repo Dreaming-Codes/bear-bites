@@ -9,6 +9,7 @@ import {
   Filter,
   Loader2,
   MapPin,
+  Search,
   XCircle,
 } from 'lucide-react'
 import { DateTime } from 'luxon'
@@ -33,6 +34,7 @@ import {
   GlassCard,
   PageWrapper,
   QuickFilterBar,
+  SearchOverlay,
 } from '@/components/bear-bites'
 import { FoodGrid, StationGroup } from '@/components/bear-bites/FoodCard'
 import { cn } from '@/lib/utils'
@@ -136,6 +138,7 @@ function HomePage() {
   const groupByStation = search.view !== 'all'
 
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
 
   const { filters, setFilters } = usePersistedFilters()
 
@@ -389,6 +392,13 @@ function HomePage() {
               </GlassButton>
             ))}
           </div>
+          <button
+            onClick={() => setIsSearchOpen(true)}
+            className="p-2 rounded-lg hover:bg-muted transition-colors shrink-0"
+            aria-label="Search food"
+          >
+            <Search size={18} className="text-primary" />
+          </button>
         </div>
 
         {/* Date Picker */}
@@ -676,6 +686,13 @@ function HomePage() {
         onChange={setFilters}
         onClose={() => setIsFilterOpen(false)}
         spicyDataAvailable={spicyDataAvailable}
+      />
+
+      {/* Search Overlay */}
+      <SearchOverlay
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        date={formatDate(selectedDate)}
       />
     </PageWrapper>
   )
