@@ -42,6 +42,11 @@ function serviceWorkerPlugin() {
       await viteBuild({
         configFile: false,
         root: __dirname,
+        resolve: {
+          alias: {
+            '@': resolve(__dirname, 'src'),
+          },
+        },
         build: {
           lib: {
             entry: swSrc,
