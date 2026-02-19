@@ -9,7 +9,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Favorite } from '@/db-collections'
 import { useSession } from '@/lib/auth-client'
 import { favoritesCollection } from '@/db-collections'
-import { orpc } from '@/orpc/client'
+import { useTRPC } from '@/trpc/client'
 
 // Track if we've synced for this session (module-level to persist across hook instances)
 let hasInitialSynced = false
@@ -53,6 +53,7 @@ function useSSRSafeFavoritesQuery(): Array<Favorite> {
 }
 
 export function useFavorites() {
+  const trpc = useTRPC()
   const { data: session } = useSession()
   const queryClient = useQueryClient()
   const isAuthenticated = !!session?.user
@@ -66,12 +67,12 @@ export function useFavorites() {
   const localFavorites = useSSRSafeFavoritesQuery()
 
   const cloudFavoritesQuery = useQuery({
-    ...orpc.favorites.getFavorites.queryOptions({ input: {} }),
+    ...trpc.favorites.getFavorites.queryOptions({}),
     enabled: isAuthenticated,
   })
 
   const syncMutation = useMutation({
-    ...orpc.favorites.syncFavorites.mutationOptions(),
+    ...trpc.favorites.syncFavorites.mutationOptions(),
     onSuccess: (data) => {
       data.synced.forEach(({ localId, cloudId }) => {
         const local = localFavorites.find((f: Favorite) => f.id === localId)
@@ -109,14 +110,14 @@ export function useFavorites() {
   })
 
   const addCloudMutation = useMutation({
-    ...orpc.favorites.addFavorite.mutationOptions(),
+    ...trpc.favorites.addFavorite.mutationOptions(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['favorites'] })
     },
   })
 
   const removeCloudMutation = useMutation({
-    ...orpc.favorites.removeFavorite.mutationOptions(),
+    ...trpc.favorites.removeFavorite.mutationOptions(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['favorites'] })
     },
@@ -141,7 +142,6 @@ export function useFavorites() {
         addedAt: f.addedAt,
       })),
     })
-     
   }, [isAuthenticated])
 
   const favoriteIds = useMemo(() => {
