@@ -92,7 +92,7 @@ export function SearchOverlay({ isOpen, onClose, date }: SearchOverlayProps) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-background/95 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex flex-col bg-background/75 backdrop-blur-sm">
       {/* Search header */}
       <div
         className="shrink-0 border-b border-border/50"
