@@ -26,3 +26,4 @@ export {
 
 export { FoodCard, FoodGrid, StationGroup } from './FoodCard'
 export { IngredientsList } from './IngredientsList'
+export { SearchOverlay } from './SearchOverlay'
