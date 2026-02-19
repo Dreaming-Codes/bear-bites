@@ -1,8 +1,4 @@
-import {
-  createTRPCClient,
-  httpBatchLink,
-  unstable_localLink,
-} from '@trpc/client'
+import { createTRPCClient, httpLink, unstable_localLink } from '@trpc/client'
 import { createTRPCContext } from '@trpc/tanstack-react-query'
 import { createIsomorphicFn } from '@tanstack/react-start'
 
@@ -26,7 +22,7 @@ export const getTRPCClient = createIsomorphicFn()
   .client(() =>
     createTRPCClient<AppRouter>({
       links: [
-        httpBatchLink({
+        httpLink({
           url: `${window.location.origin}/api/trpc`,
         }),
       ],
