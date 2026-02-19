@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 import { ArrowLeft, Heart, Loader2 } from 'lucide-react'
 import type { Nutrition } from '@/lib/menu/schemas'
-import { orpc } from '@/orpc/client'
+import { useTRPC } from '@/trpc/client'
 import {
   Container,
   GlassButton,
@@ -209,6 +209,7 @@ function NutritionLabel({ nutrition }: { nutrition: Nutrition }) {
 }
 
 function FoodDetailPage() {
+  const trpc = useTRPC()
   const { itemId } = Route.useParams()
   const { date, locationId } = Route.useSearch()
   const router = useRouter()
@@ -222,12 +223,10 @@ function FoodDetailPage() {
   const location = LOCATIONS.find((l) => l.id === locationId) || LOCATIONS[1]
 
   const foodQuery = useQuery(
-    orpc.menu.getFoodDetail.queryOptions({
-      input: {
-        itemId: decodedItemId,
-        locationId,
-        date,
-      },
+    trpc.menu.getFoodDetail.queryOptions({
+      itemId: decodedItemId,
+      locationId,
+      date,
     }),
   )
 

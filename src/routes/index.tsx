@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import { DateTime } from 'luxon'
 import type { Meal, MenuItem } from '@/lib/menu/schemas'
-import { orpc } from '@/orpc/client'
+import { useTRPC } from '@/trpc/client'
 import {
   LOCATIONS,
   formatMealHours,
@@ -125,6 +125,7 @@ const MEALS: Array<{ id: Meal; label: string }> = [
 ]
 
 function HomePage() {
+  const trpc = useTRPC()
   const navigate = useNavigate()
   const search = Route.useSearch()
 
@@ -215,11 +216,9 @@ function HomePage() {
     filters.excludeSpicy
 
   const menuQuery = useQuery(
-    orpc.menu.getMenu.queryOptions({
-      input: {
-        locationId: selectedLocation.id,
-        date: formatDate(selectedDate),
-      },
+    trpc.menu.getMenu.queryOptions({
+      locationId: selectedLocation.id,
+      date: formatDate(selectedDate),
     }),
   )
 
@@ -286,8 +285,8 @@ function HomePage() {
   }, [menuQuery.data, selectedDate])
 
   const dateBoundsQuery = useQuery(
-    orpc.menu.getDateBounds.queryOptions({
-      input: { locationId: selectedLocation.id },
+    trpc.menu.getDateBounds.queryOptions({
+      locationId: selectedLocation.id,
     }),
   )
 

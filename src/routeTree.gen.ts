@@ -15,8 +15,7 @@ import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as IngestSplatRouteImport } from './routes/ingest.$'
 import { Route as FoodItemIdRouteImport } from './routes/food.$itemId'
-import { Route as ApiSplatRouteImport } from './routes/api.$'
-import { Route as ApiRpcSplatRouteImport } from './routes/api.rpc.$'
+import { Route as ApiTrpcSplatRouteImport } from './routes/api.trpc.$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -49,14 +48,9 @@ const FoodItemIdRoute = FoodItemIdRouteImport.update({
   path: '/food/$itemId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiSplatRoute = ApiSplatRouteImport.update({
-  id: '/api/$',
-  path: '/api/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
-  id: '/api/rpc/$',
-  path: '/api/rpc/$',
+const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
+  id: '/api/trpc/$',
+  path: '/api/trpc/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -70,22 +64,20 @@ export interface FileRoutesByFullPath {
   '/favorites': typeof FavoritesRoute
   '/profile': typeof ProfileRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/api/$': typeof ApiSplatRoute
   '/food/$itemId': typeof FoodItemIdRoute
   '/ingest/$': typeof IngestSplatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/rpc/$': typeof ApiRpcSplatRoute
+  '/api/trpc/$': typeof ApiTrpcSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/favorites': typeof FavoritesRoute
   '/profile': typeof ProfileRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/api/$': typeof ApiSplatRoute
   '/food/$itemId': typeof FoodItemIdRoute
   '/ingest/$': typeof IngestSplatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/rpc/$': typeof ApiRpcSplatRoute
+  '/api/trpc/$': typeof ApiTrpcSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -93,11 +85,10 @@ export interface FileRoutesById {
   '/favorites': typeof FavoritesRoute
   '/profile': typeof ProfileRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/api/$': typeof ApiSplatRoute
   '/food/$itemId': typeof FoodItemIdRoute
   '/ingest/$': typeof IngestSplatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/rpc/$': typeof ApiRpcSplatRoute
+  '/api/trpc/$': typeof ApiTrpcSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -106,33 +97,30 @@ export interface FileRouteTypes {
     | '/favorites'
     | '/profile'
     | '/sitemap.xml'
-    | '/api/$'
     | '/food/$itemId'
     | '/ingest/$'
     | '/api/auth/$'
-    | '/api/rpc/$'
+    | '/api/trpc/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/favorites'
     | '/profile'
     | '/sitemap.xml'
-    | '/api/$'
     | '/food/$itemId'
     | '/ingest/$'
     | '/api/auth/$'
-    | '/api/rpc/$'
+    | '/api/trpc/$'
   id:
     | '__root__'
     | '/'
     | '/favorites'
     | '/profile'
     | '/sitemap.xml'
-    | '/api/$'
     | '/food/$itemId'
     | '/ingest/$'
     | '/api/auth/$'
-    | '/api/rpc/$'
+    | '/api/trpc/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -140,11 +128,10 @@ export interface RootRouteChildren {
   FavoritesRoute: typeof FavoritesRoute
   ProfileRoute: typeof ProfileRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  ApiSplatRoute: typeof ApiSplatRoute
   FoodItemIdRoute: typeof FoodItemIdRoute
   IngestSplatRoute: typeof IngestSplatRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
-  ApiRpcSplatRoute: typeof ApiRpcSplatRoute
+  ApiTrpcSplatRoute: typeof ApiTrpcSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -191,18 +178,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FoodItemIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/$': {
-      id: '/api/$'
-      path: '/api/$'
-      fullPath: '/api/$'
-      preLoaderRoute: typeof ApiSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/rpc/$': {
-      id: '/api/rpc/$'
-      path: '/api/rpc/$'
-      fullPath: '/api/rpc/$'
-      preLoaderRoute: typeof ApiRpcSplatRouteImport
+    '/api/trpc/$': {
+      id: '/api/trpc/$'
+      path: '/api/trpc/$'
+      fullPath: '/api/trpc/$'
+      preLoaderRoute: typeof ApiTrpcSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
@@ -220,11 +200,10 @@ const rootRouteChildren: RootRouteChildren = {
   FavoritesRoute: FavoritesRoute,
   ProfileRoute: ProfileRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  ApiSplatRoute: ApiSplatRoute,
   FoodItemIdRoute: FoodItemIdRoute,
   IngestSplatRoute: IngestSplatRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
-  ApiRpcSplatRoute: ApiRpcSplatRoute,
+  ApiTrpcSplatRoute: ApiTrpcSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
