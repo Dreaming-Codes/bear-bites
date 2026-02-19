@@ -13,6 +13,7 @@ export {
   AllergenBadge,
   DietaryTags,
   AllergenList,
+  SpicyBadge,
 } from './DietaryBadges'
 
 export {

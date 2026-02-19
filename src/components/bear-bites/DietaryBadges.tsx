@@ -1,4 +1,4 @@
-import { AlertTriangle, Leaf, Wheat } from 'lucide-react'
+import { AlertTriangle, Flame, Leaf, Wheat } from 'lucide-react'
 import type { Allergen, DietaryTag } from '@/lib/menu/schemas'
 import { cn } from '@/lib/utils'
 
@@ -135,6 +135,19 @@ export function AllergenList({
         <span className="badge-allergen">+{hiddenCount}</span>
       )}
     </div>
+  )
+}
+
+interface SpicyBadgeProps {
+  size?: 'sm' | 'md'
+}
+
+export function SpicyBadge({ size = 'sm' }: SpicyBadgeProps) {
+  return (
+    <span className={cn('badge-spicy', size === 'md' && 'px-2.5 py-1 text-sm')}>
+      <Flame size={size === 'sm' ? 12 : 14} />
+      <span>Spicy</span>
+    </span>
   )
 }
 

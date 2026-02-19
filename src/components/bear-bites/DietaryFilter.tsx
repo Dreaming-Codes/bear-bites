@@ -27,6 +27,7 @@ export interface DietaryFilters {
   vegetarian: boolean
   glutenFree: boolean
   excludeAllergens: Array<Allergen>
+  excludeSpicy: boolean
 }
 
 export const DEFAULT_FILTERS: DietaryFilters = {
@@ -34,6 +35,7 @@ export const DEFAULT_FILTERS: DietaryFilters = {
   vegetarian: false,
   glutenFree: false,
   excludeAllergens: [],
+  excludeSpicy: false,
 }
 
 interface FilterChipProps {
@@ -42,6 +44,7 @@ interface FilterChipProps {
   selected: boolean
   onToggle: () => void
   variant?: 'include' | 'exclude'
+  disabled?: boolean
 }
 
 function FilterChip({
@@ -50,12 +53,15 @@ function FilterChip({
   selected,
   onToggle,
   variant = 'include',
+  disabled = false,
 }: FilterChipProps) {
   return (
     <button
       onClick={onToggle}
+      disabled={disabled}
       className={cn(
         'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all',
+        disabled && 'opacity-50 cursor-not-allowed',
         selected
           ? variant === 'include'
             ? 'bg-primary text-primary-foreground'
@@ -78,12 +84,14 @@ interface DietaryFilterPanelProps {
   filters: DietaryFilters
   onChange: (filters: DietaryFilters) => void
   onClose?: () => void
+  spicyDataAvailable?: boolean
 }
 
 export function DietaryFilterPanel({
   filters,
   onChange,
   onClose,
+  spicyDataAvailable = true,
 }: DietaryFilterPanelProps) {
   const [localFilters, setLocalFilters] = useState(filters)
 
@@ -116,6 +124,13 @@ export function DietaryFilterPanel({
     setLocalFilters(newFilters)
   }
 
+  const toggleExcludeSpicy = () => {
+    setLocalFilters({
+      ...localFilters,
+      excludeSpicy: !localFilters.excludeSpicy,
+    })
+  }
+
   const applyFilters = () => {
     onChange(localFilters)
     onClose?.()
@@ -129,7 +144,8 @@ export function DietaryFilterPanel({
     localFilters.vegan ||
     localFilters.vegetarian ||
     localFilters.glutenFree ||
-    localFilters.excludeAllergens.length > 0
+    localFilters.excludeAllergens.length > 0 ||
+    localFilters.excludeSpicy
 
   return (
     <div className="space-y-4">
@@ -177,6 +193,28 @@ export function DietaryFilterPanel({
         </div>
       </div>
 
+      {/* Spicy Exclusion */}
+      <div>
+        <h3 className="font-semibold mb-2 text-sm uppercase text-muted-foreground">
+          Spiciness
+        </h3>
+        <div className="flex flex-wrap gap-2">
+          <FilterChip
+            label="Spicy"
+            emoji="🌶️"
+            selected={localFilters.excludeSpicy}
+            onToggle={toggleExcludeSpicy}
+            variant="exclude"
+            disabled={!spicyDataAvailable}
+          />
+          {!spicyDataAvailable && (
+            <span className="text-xs text-muted-foreground self-center">
+              Loading spicy data...
+            </span>
+          )}
+        </div>
+      </div>
+
       {/* Actions */}
       <div className="flex gap-2 pt-2">
         <GlassButton
@@ -204,6 +242,7 @@ interface FilterModalProps {
   filters: DietaryFilters
   onChange: (filters: DietaryFilters) => void
   onClose: () => void
+  spicyDataAvailable?: boolean
 }
 
 export function FilterModal({
@@ -211,6 +250,7 @@ export function FilterModal({
   filters,
   onChange,
   onClose,
+  spicyDataAvailable,
 }: FilterModalProps) {
   if (!isOpen) return null
 
@@ -240,6 +280,7 @@ export function FilterModal({
             filters={filters}
             onChange={onChange}
             onClose={onClose}
+            spicyDataAvailable={spicyDataAvailable}
           />
         </GlassCard>
       </div>
@@ -250,9 +291,14 @@ export function FilterModal({
 interface QuickFilterBarProps {
   filters: DietaryFilters
   onChange: (filters: DietaryFilters) => void
+  spicyDataAvailable?: boolean
 }
 
-export function QuickFilterBar({ filters, onChange }: QuickFilterBarProps) {
+export function QuickFilterBar({
+  filters,
+  onChange,
+  spicyDataAvailable = true,
+}: QuickFilterBarProps) {
   const toggleDietaryTag = (tag: DietaryTag) => {
     const newFilters = { ...filters }
     if (tag === 'vegan') {
@@ -265,6 +311,10 @@ export function QuickFilterBar({ filters, onChange }: QuickFilterBarProps) {
       newFilters.glutenFree = !newFilters.glutenFree
     }
     onChange(newFilters)
+  }
+
+  const toggleExcludeSpicy = () => {
+    onChange({ ...filters, excludeSpicy: !filters.excludeSpicy })
   }
 
   return (
@@ -285,6 +335,14 @@ export function QuickFilterBar({ filters, onChange }: QuickFilterBarProps) {
           variant="include"
         />
       ))}
+      <FilterChip
+        label="No Spicy"
+        emoji="🌶️"
+        selected={filters.excludeSpicy}
+        onToggle={toggleExcludeSpicy}
+        variant="exclude"
+        disabled={!spicyDataAvailable}
+      />
     </div>
   )
 }

@@ -11,6 +11,7 @@ const DEFAULT_FILTERS: DietaryFilters = {
   vegetarian: false,
   glutenFree: false,
   excludeAllergens: [],
+  excludeSpicy: false,
 }
 
 function loadFromStorage(): DietaryFilters {
@@ -24,6 +25,7 @@ function loadFromStorage(): DietaryFilters {
         vegetarian: parsed.vegetarian ?? false,
         glutenFree: parsed.glutenFree ?? false,
         excludeAllergens: (parsed.excludeAllergens ?? []) as Array<Allergen>,
+        excludeSpicy: parsed.excludeSpicy ?? false,
       }
     }
   } catch (e) {
