@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { Heart } from 'lucide-react'
 import { GlassCard } from './GlassCard'
-import { AllergenBadge, DietaryBadge } from './DietaryBadges'
+import { AllergenBadge, DietaryBadge, SpicyBadge } from './DietaryBadges'
 import type { MenuItem } from '@/lib/menu/schemas'
 import { cn } from '@/lib/utils'
 
@@ -43,12 +43,15 @@ export function FoodCard({
             <p className="text-sm text-muted-foreground mb-2">{item.station}</p>
           )}
 
-          {/* Dietary tags and allergens in one row */}
-          {(item.dietaryTags.length > 0 || item.allergens.length > 0) && (
+          {/* Dietary tags, spicy badge, and allergens in one row */}
+          {(item.dietaryTags.length > 0 ||
+            item.allergens.length > 0 ||
+            item.isSpicy) && (
             <div className="flex flex-wrap gap-1">
               {item.dietaryTags.map((tag) => (
                 <DietaryBadge key={tag} tag={tag} />
               ))}
+              {item.isSpicy && <SpicyBadge />}
               {item.allergens.map((allergen) => (
                 <AllergenBadge key={allergen} allergen={allergen} showLabel />
               ))}

@@ -211,7 +211,8 @@ function HomePage() {
     filters.vegan ||
     filters.vegetarian ||
     filters.glutenFree ||
-    filters.excludeAllergens.length > 0
+    filters.excludeAllergens.length > 0 ||
+    filters.excludeSpicy
 
   const menuQuery = useQuery(
     orpc.menu.getMenu.queryOptions({
@@ -245,6 +246,11 @@ function HomePage() {
           if (item.allergens.includes(allergen)) {
             return false
           }
+        }
+
+        // Exclude spicy items (only when isSpicy is confirmed true)
+        if (filters.excludeSpicy && item.isSpicy === true) {
+          return false
         }
 
         return true
@@ -349,7 +355,19 @@ function HomePage() {
     (filters.vegan ? 1 : 0) +
     (filters.vegetarian ? 1 : 0) +
     (filters.glutenFree ? 1 : 0) +
-    filters.excludeAllergens.length
+    filters.excludeAllergens.length +
+    (filters.excludeSpicy ? 1 : 0)
+
+  // Spicy data is available when all items in the current meal have been classified
+  const spicyDataAvailable = useMemo(() => {
+    if (!menuQuery.data?.meals) return false
+    const apiMealKey = getApiMealKey(selectedMeal, selectedDate)
+    const items = menuQuery.data.meals[apiMealKey] || []
+    if (items.length === 0) return false
+    return items.every(
+      (item) => item.isSpicy !== null && item.isSpicy !== undefined,
+    )
+  }, [menuQuery.data, selectedMeal, selectedDate])
 
   return (
     <PageWrapper>
@@ -531,7 +549,11 @@ function HomePage() {
 
             {/* Quick Dietary Filters */}
             <div className="mb-4">
-              <QuickFilterBar filters={filters} onChange={setFilters} />
+              <QuickFilterBar
+                filters={filters}
+                onChange={setFilters}
+                spicyDataAvailable={spicyDataAvailable}
+              />
             </div>
 
             {/* View Toggle & Filter */}
@@ -654,6 +676,7 @@ function HomePage() {
         filters={filters}
         onChange={setFilters}
         onClose={() => setIsFilterOpen(false)}
+        spicyDataAvailable={spicyDataAvailable}
       />
     </PageWrapper>
   )

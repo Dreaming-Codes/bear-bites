@@ -235,6 +235,7 @@ export const MenuItemSchema = z.object({
   dietaryTags: z.array(DietaryTagSchema),
   allergens: z.array(AllergenSchema),
   labelUrl: z.string().url(),
+  isSpicy: z.boolean().nullable().optional(), // AI-determined spiciness (null = not yet classified)
 })
 
 export const NutritionSchema = z.object({

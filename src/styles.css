@@ -71,6 +71,10 @@ code {
   /* Allergen warning colors */
   --allergen-bg: oklch(0.92 0.08 30);
   --allergen-text: oklch(0.4 0.12 30);
+
+  /* Spicy colors */
+  --spicy-bg: oklch(0.88 0.15 25);
+  --spicy-text: oklch(0.35 0.15 25);
 }
 
 .dark {
@@ -116,6 +120,10 @@ code {
   /* Allergen warning colors - dark mode */
   --allergen-bg: oklch(0.35 0.1 30);
   --allergen-text: oklch(0.9 0.08 30);
+
+  /* Spicy colors - dark mode */
+  --spicy-bg: oklch(0.35 0.15 25);
+  --spicy-text: oklch(0.9 0.12 25);
 }
 
 @theme inline {
@@ -165,6 +173,8 @@ code {
   --color-gluten-free-text: var(--gluten-free-text);
   --color-allergen-bg: var(--allergen-bg);
   --color-allergen-text: var(--allergen-text);
+  --color-spicy-bg: var(--spicy-bg);
+  --color-spicy-text: var(--spicy-text);
 }
 
 @layer base {
@@ -303,6 +313,18 @@ body::before {
   font-weight: 500;
   background-color: var(--allergen-bg);
   color: var(--allergen-text);
+}
+
+.badge-spicy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: var(--spicy-bg);
+  color: var(--spicy-text);
 }
 
 /* Bear Bites gradient backgrounds */

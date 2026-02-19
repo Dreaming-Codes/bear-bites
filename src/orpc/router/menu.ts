@@ -1,6 +1,6 @@
 import { os } from '@orpc/server'
 import { z } from 'zod'
-import { env } from 'cloudflare:workers'
+import { env, waitUntil } from 'cloudflare:workers'
 import {
   DayMenuSchema,
   FoodDetailSchema,
@@ -14,7 +14,7 @@ import { buildLabelUrl } from '@/lib/menu/scraper'
 import { parseDateInLA, toJSDate } from '@/lib/timezone'
 
 function getMenuService() {
-  return createMenuService((env).MENU_CACHE)
+  return createMenuService(env.MENU_CACHE, env.AI)
 }
 
 export const getLocations = os
@@ -34,7 +34,15 @@ export const getMenu = os
   .output(DayMenuSchema.nullable())
   .handler(async ({ input }) => {
     const date = toJSDate(parseDateInLA(input.date))
-    return getMenuService().getMenu(input.locationId, date)
+    const service = getMenuService()
+    const menu = await service.getMenu(input.locationId, date)
+
+    // Trigger background spicy enrichment if menu has unenriched items
+    if (menu) {
+      waitUntil(service.enrichMenuWithSpiciness(menu))
+    }
+
+    return menu
   })
 
 export const getMenusForWeek = os
@@ -105,9 +113,11 @@ export const searchMenuItems = os
     }
 
     const query = input.query.toLowerCase()
-    const results: Array<z.infer<typeof MenuItemSchema> & {
-      meal: z.infer<typeof MealSchema>
-    }> = []
+    const results: Array<
+      z.infer<typeof MenuItemSchema> & {
+        meal: z.infer<typeof MealSchema>
+      }
+    > = []
 
     for (const [mealName, items] of Object.entries(menu.meals)) {
       for (const item of items) {
@@ -133,6 +143,7 @@ export const getFilteredMenu = os
         vegetarian: z.boolean().optional(),
         glutenFree: z.boolean().optional(),
         excludeAllergens: z.array(z.string()).optional(),
+        excludeSpicy: z.boolean().optional(),
       }),
     }),
   )
@@ -166,6 +177,10 @@ export const getFilteredMenu = os
               return false
             }
           }
+        }
+
+        if (filters.excludeSpicy && item.isSpicy === true) {
+          return false
         }
 
         return true

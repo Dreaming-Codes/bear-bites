@@ -1,12 +1,14 @@
 import { nowInLA, toJSDate } from '../timezone'
 import {
+  buildLabelUrl,
   buildMenuUrl,
   formatDateISO,
   parseLabelPage,
   parseShortMenu,
 } from './scraper'
 import { LOCATIONS } from './schemas'
-import type { DayMenu, FoodDetail, Location } from './schemas'
+import type { DayMenu, FoodDetail, Location, MenuItem } from './schemas'
+import { classifySpicy, flattenIngredients, getCachedSpicy } from './spicy'
 
 const MENU_CACHE_TTL_SECONDS = 60 * 60 * 24 // 1 day for menu data
 const FOOD_LABEL_CACHE_TTL_SECONDS = 60 * 60 * 24 * 7 // 1 week for food labels
@@ -25,9 +27,11 @@ function getDateBoundsCacheKey(locationId: string): string {
 
 export class MenuService {
   private kv: KVNamespace
+  private ai: Ai
 
-  constructor(kv: KVNamespace) {
+  constructor(kv: KVNamespace, ai: Ai) {
     this.kv = kv
+    this.ai = ai
   }
 
   getLocations(): Array<Location> {
@@ -129,6 +133,125 @@ export class MenuService {
     return Object.values(menu.meals).some((items) => items && items.length > 0)
   }
 
+  /**
+   * Collect all menu items from a DayMenu across all meals.
+   */
+  private getAllMenuItems(menu: DayMenu): Array<MenuItem> {
+    const items: Array<MenuItem> = []
+    for (const mealItems of Object.values(menu.meals)) {
+      if (mealItems) {
+        items.push(...mealItems)
+      }
+    }
+    return items
+  }
+
+  /**
+   * Check if any item in the menu still needs spicy classification.
+   */
+  private menuNeedsSpicyEnrichment(menu: DayMenu): boolean {
+    const items = this.getAllMenuItems(menu)
+    return items.some(
+      (item) => item.isSpicy === null || item.isSpicy === undefined,
+    )
+  }
+
+  /**
+   * Enrich a menu with AI-powered spicy classification.
+   * Runs in the background via ctx.waitUntil().
+   *
+   * For each item missing spicy data:
+   * 1. Check the permanent spicy KV cache (spicy:{itemId})
+   * 2. If not cached, fetch the label page to get ingredients (reuses food detail KV cache)
+   * 3. Call Workers AI to classify spiciness
+   * 4. Update the menu cache with enriched data
+   */
+  async enrichMenuWithSpiciness(menu: DayMenu): Promise<void> {
+    if (!this.menuNeedsSpicyEnrichment(menu)) return
+
+    const location = this.getLocation(menu.locationId)
+    if (!location) return
+
+    const items = this.getAllMenuItems(menu)
+    let enriched = false
+
+    // First pass: check the permanent spicy cache for all items
+    // This is cheap (just KV reads) and can resolve many items without AI
+    const spicyCacheResults = await Promise.all(
+      items
+        .filter((item) => item.isSpicy === null || item.isSpicy === undefined)
+        .map(async (item) => {
+          const cached = await getCachedSpicy(item.id, this.kv)
+          if (cached !== null) {
+            item.isSpicy = cached
+            enriched = true
+          }
+          return { item, needsAI: cached === null }
+        }),
+    )
+
+    // Second pass: for items not in cache, fetch ingredients + classify
+    const needsAI = spicyCacheResults.filter((r) => r.needsAI)
+
+    if (needsAI.length > 0) {
+      // Process in batches of 5 to avoid overwhelming FoodPro and AI
+      const BATCH_SIZE = 5
+      for (let i = 0; i < needsAI.length; i += BATCH_SIZE) {
+        const batch = needsAI.slice(i, i + BATCH_SIZE)
+
+        await Promise.all(
+          batch.map(async ({ item }) => {
+            try {
+              // Build the label URL using the date from the menu
+              const date = new Date(menu.date + 'T12:00:00')
+              const labelUrl = buildLabelUrl(
+                item.id,
+                menu.locationId,
+                location.name,
+                date,
+              )
+
+              // Fetch food detail (reuses KV cache)
+              const detail = await this.getFoodDetail(item.id, labelUrl)
+              if (!detail || detail.ingredients.length === 0) {
+                // No ingredients available — can't classify, default to not spicy
+                item.isSpicy = false
+                enriched = true
+                return
+              }
+
+              const ingredientsText = flattenIngredients(detail.ingredients)
+              const isSpicy = await classifySpicy(
+                item.id,
+                item.name,
+                ingredientsText,
+                this.kv,
+                this.ai,
+              )
+
+              item.isSpicy = isSpicy
+              enriched = true
+            } catch (error) {
+              console.error(
+                `Failed to enrich spiciness for ${item.name}:`,
+                error,
+              )
+              // Leave as null — will be retried on next request
+            }
+          }),
+        )
+      }
+    }
+
+    // If any items were enriched, update the menu cache
+    if (enriched) {
+      const cacheKey = getMenuCacheKey(menu.locationId, menu.date)
+      await this.kv.put(cacheKey, JSON.stringify(menu), {
+        expirationTtl: MENU_CACHE_TTL_SECONDS,
+      })
+    }
+  }
+
   async getDateBounds(
     locationId: string,
   ): Promise<{ minDate: string; maxDate: string }> {
@@ -203,6 +326,6 @@ export class MenuService {
   }
 }
 
-export function createMenuService(kv: KVNamespace): MenuService {
-  return new MenuService(kv)
+export function createMenuService(kv: KVNamespace, ai: Ai): MenuService {
+  return new MenuService(kv, ai)
 }
