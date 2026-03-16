@@ -456,8 +456,10 @@ function HomePage() {
           </div>
         </GlassCard>
 
-        {/* Check if location is closed for the day */}
-        {isLocationClosedForDay(selectedLocation.id, selectedDate) ? (
+        {/* Check if location is closed for the day AND has no scraped menu data */}
+        {isLocationClosedForDay(selectedLocation.id, selectedDate) &&
+        !menuQuery.isLoading &&
+        availableMeals.size === 0 ? (
           <GlassCard className="text-center py-16">
             <XCircle size={48} className="mx-auto text-red-500/70 mb-4" />
             <p className="text-xl font-semibold mb-2">
@@ -500,16 +502,17 @@ function HomePage() {
                 )
                 const isAvailable = availableMeals.has(meal.id)
                 const isSelected = selectedMeal === meal.id
-                const isClosed = hours === null
+                const hasNoSchedule = hours === null
 
-                // Skip meals that have no scheduled hours for this location/day
-                if (isClosed) return null
+                // Skip meals that have no scheduled hours AND no scraped data
+                if (hasNoSchedule && !isAvailable) return null
 
                 const now = getRiversideDate()
                 const isTodayDate = formatDate(selectedDate) === formatDate(now)
-                const mealStatus = isTodayDate
-                  ? getMealStatus(selectedLocation.id, meal.id, selectedDate)
-                  : null
+                const mealStatus =
+                  isTodayDate && !hasNoSchedule
+                    ? getMealStatus(selectedLocation.id, meal.id, selectedDate)
+                    : null
 
                 const isCurrentlyOpen = mealStatus === 'open'
                 const isUpcoming = mealStatus === 'upcoming'
@@ -539,18 +542,20 @@ function HomePage() {
                         />
                       )}
                     </span>
-                    <span
-                      className={cn(
-                        'text-xs',
-                        isTodayDate &&
-                          isCurrentlyOpen &&
-                          'text-green-500 font-medium',
-                        isTodayDate && isUpcoming && 'text-yellow-500',
-                        isTodayDate && isPast && 'text-red-500/70',
-                      )}
-                    >
-                      {formatMealHours(hours)}
-                    </span>
+                    {hours && (
+                      <span
+                        className={cn(
+                          'text-xs',
+                          isTodayDate &&
+                            isCurrentlyOpen &&
+                            'text-green-500 font-medium',
+                          isTodayDate && isUpcoming && 'text-yellow-500',
+                          isTodayDate && isPast && 'text-red-500/70',
+                        )}
+                      >
+                        {formatMealHours(hours)}
+                      </span>
+                    )}
                   </button>
                 )
               })}
