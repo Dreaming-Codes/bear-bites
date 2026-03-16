@@ -25,6 +25,7 @@
 
   "ai": {
     "binding": "AI",
+    "remote": true
   },
 
   "triggers": {
