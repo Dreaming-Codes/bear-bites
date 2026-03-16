@@ -1,5 +1,5 @@
 import { CheckCircle, Download, MoreVertical, Plus, Share } from 'lucide-react'
-import type {InstallMethod} from '@/hooks/usePWAInstall';
+import type { InstallMethod } from '@/hooks/usePWAInstall'
 
 interface InstallInstructionsProps {
   installMethod: InstallMethod

@@ -10,7 +10,6 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import { Home } from 'lucide-react'
 import { useEffect } from 'react'
 
-
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import PWADevtools, { PWADevProvider } from '../integrations/pwa/provider'
 import { PostHogProvider } from '../integrations/posthog/provider'

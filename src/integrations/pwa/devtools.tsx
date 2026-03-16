@@ -1,11 +1,10 @@
-import type {Browser, InstallMethod, PWADevOverrides, Platform} from '@/hooks/usePWAInstall';
-import {
-  
-  
-  
-  
-  detectPlatform
+import type {
+  Browser,
+  InstallMethod,
+  PWADevOverrides,
+  Platform,
 } from '@/hooks/usePWAInstall'
+import { detectPlatform } from '@/hooks/usePWAInstall'
 
 const PLATFORMS: Array<Platform> = ['ios', 'android', 'desktop', 'unknown']
 const BROWSERS: Array<Browser> = [
