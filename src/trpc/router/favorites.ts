@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { env } from 'cloudflare:workers'
+import { protectedProcedure, publicProcedure, router } from '../init'
 import { FavoriteSchema } from '@/db-collections'
-import { publicProcedure, protectedProcedure, router } from '../init'
 
 const D1FavoriteSchema = z.object({
   id: z.string(),

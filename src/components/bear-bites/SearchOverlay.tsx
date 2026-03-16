@@ -2,9 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { Loader2, Search, X } from 'lucide-react'
 import { useQueries } from '@tanstack/react-query'
+import { AllergenBadge, DietaryBadge, SpicyBadge } from './DietaryBadges'
+import type { Meal } from '@/lib/menu/schemas'
 import { useTRPC } from '@/trpc/client'
-import { LOCATIONS, type Meal } from '@/lib/menu/schemas'
-import { DietaryBadge, SpicyBadge, AllergenBadge } from './DietaryBadges'
+import { LOCATIONS } from '@/lib/menu/schemas'
 import { cn } from '@/lib/utils'
 
 interface SearchOverlayProps {
@@ -20,8 +21,8 @@ interface SearchResult {
   meal: Meal
   locationId: string
   locationName: string
-  dietaryTags: string[]
-  allergens: string[]
+  dietaryTags: Array<string>
+  allergens: Array<string>
   isSpicy?: boolean | null
 }
 
@@ -50,7 +51,7 @@ export function SearchOverlay({ isOpen, onClose, date }: SearchOverlayProps) {
     (q) => q.isLoading && q.fetchStatus !== 'idle',
   )
 
-  const results: SearchResult[] = searchQueries.flatMap((q, i) => {
+  const results: Array<SearchResult> = searchQueries.flatMap((q, i) => {
     if (!q.data) return []
     const location = LOCATIONS[i]
     return q.data.map((item) => ({

@@ -88,7 +88,7 @@ export async function classifySpicy(
         : ((response as { response?: string }).response ?? '')
 
     // Parse the JSON response — be lenient
-    const spicy = /\"spicy\"\s*:\s*true/i.test(text)
+    const spicy = /"spicy"\s*:\s*true/i.test(text)
 
     await cacheSpicy(itemId, spicy, kv)
     return spicy

@@ -1,10 +1,10 @@
-import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching'
+import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching'
 import { clientsClaim } from 'workbox-core'
-import { registerRoute, NavigationRoute } from 'workbox-routing'
+import { NavigationRoute, registerRoute } from 'workbox-routing'
 import {
-  StaleWhileRevalidate,
   CacheFirst,
   NetworkFirst,
+  StaleWhileRevalidate,
 } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 import { createTRPCClient, httpLink } from '@trpc/client'
@@ -96,7 +96,7 @@ function createPrefetchClient() {
 const LOCATIONS = ['02', '03']
 
 /** Get today and tomorrow as YYYY-MM-DD strings in LA timezone */
-function getPrefetchDates(): string[] {
+function getPrefetchDates(): Array<string> {
   const fmt = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'America/Los_Angeles',
     year: 'numeric',
@@ -115,7 +115,7 @@ async function prefetchMenuData() {
   const trpc = createPrefetchClient()
   const dates = getPrefetchDates()
 
-  const promises: Promise<unknown>[] = []
+  const promises: Array<Promise<unknown>> = []
 
   // Prefetch locations list
   promises.push(trpc.menu.getLocations.query({}))

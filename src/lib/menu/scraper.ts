@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon'
-import { formatDateLA, LA_TIMEZONE } from '../timezone'
+import { LA_TIMEZONE, formatDateLA } from '../timezone'
 import type {
   Allergen,
   DayMenu,

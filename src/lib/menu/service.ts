@@ -7,8 +7,8 @@ import {
   parseShortMenu,
 } from './scraper'
 import { LOCATIONS } from './schemas'
-import type { DayMenu, FoodDetail, Location, MenuItem } from './schemas'
 import { classifySpicy, flattenIngredients, getCachedSpicy } from './spicy'
+import type { DayMenu, FoodDetail, Location, MenuItem } from './schemas'
 
 const MENU_CACHE_TTL_SECONDS = 60 * 60 * 24 // 1 day for menu data
 const FOOD_LABEL_CACHE_TTL_SECONDS = 60 * 60 * 24 * 7 // 1 week for food labels

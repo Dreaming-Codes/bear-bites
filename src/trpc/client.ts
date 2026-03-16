@@ -11,6 +11,7 @@ export const getTRPCClient = createIsomorphicFn()
       links: [
         unstable_localLink({
           router: appRouter,
+          // eslint-disable-next-line @typescript-eslint/require-await
           createContext: async () => {
             // On SSR, we don't have auth context — public procedures only
             return { userId: undefined }

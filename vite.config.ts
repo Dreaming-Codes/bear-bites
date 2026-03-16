@@ -1,6 +1,6 @@
 import { URL, fileURLToPath } from 'node:url'
-import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs'
-import { resolve, join, extname } from 'node:path'
+import { readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
+import { extname, join, resolve } from 'node:path'
 import { createHash } from 'node:crypto'
 import { defineConfig, build as viteBuild } from 'vite'
 import { devtools } from '@tanstack/devtools-vite'

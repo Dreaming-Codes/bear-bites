@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { env, waitUntil } from 'cloudflare:workers'
+import { publicProcedure, router } from '../init'
 import {
   DayMenuSchema,
   FoodDetailSchema,
@@ -11,7 +12,6 @@ import {
 } from '@/lib/menu'
 import { buildLabelUrl } from '@/lib/menu/scraper'
 import { parseDateInLA, toJSDate } from '@/lib/timezone'
-import { publicProcedure, router } from '../init'
 
 function getMenuService() {
   return createMenuService(env.MENU_CACHE, env.AI)
