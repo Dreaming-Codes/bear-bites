@@ -21,7 +21,7 @@ export default {
 
   async scheduled(
     _controller: ScheduledController,
-    env: Env,
+    env: Cloudflare.Env,
     ctx: ExecutionContext,
   ): Promise<void> {
     console.log('[cron] Pre-warming menu caches...')
