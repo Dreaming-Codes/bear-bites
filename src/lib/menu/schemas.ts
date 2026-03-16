@@ -206,26 +206,11 @@ export function isLocationClosedForDay(
   return getAvailableMeals(locationId, date).length === 0
 }
 
-// Map display meal to API meal key
-// On weekends, "brunch" in the UI maps to "lunch" data from the API
-export function getApiMealKey(meal: Meal, date: Date | string): Meal {
-  const dayType = getDayType(date)
-  const isWeekend = dayType === 'weekend'
-
-  if (meal === 'brunch' && isWeekend) {
-    return 'lunch' // API returns lunch data for weekend brunch
-  }
-  return meal
-}
-
-// Check if a display meal has data available (considering brunch/lunch mapping)
 export function hasMealData(
   meal: Meal,
   meals: Record<string, Array<unknown> | undefined>,
-  date: Date,
 ): boolean {
-  const apiKey = getApiMealKey(meal, date)
-  return (meals[apiKey]?.length || 0) > 0
+  return (meals[meal]?.length || 0) > 0
 }
 
 export const MenuItemSchema = z.object({

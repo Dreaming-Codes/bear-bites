@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
 import { LA_TIMEZONE, formatDateLA } from '../timezone'
+import { getMealHours } from './schemas'
 import type {
   Allergen,
   DayMenu,
@@ -227,7 +228,16 @@ export function parseShortMenu(
     const mealNameMatch = section.match(/^(\w+)<\/h3>/i)
     if (!mealNameMatch) continue
 
-    const mealName = mealNameMatch[1].toLowerCase() as Meal
+    let mealName = mealNameMatch[1].toLowerCase() as Meal
+
+    // FoodPro always labels weekend brunch as "Lunch" — remap based on location schedule
+    if (
+      mealName === 'lunch' &&
+      getMealHours(locationId, 'brunch', dateStr) !== null &&
+      getMealHours(locationId, 'lunch', dateStr) === null
+    ) {
+      mealName = 'brunch'
+    }
     const items: Array<MenuItem> = []
 
     // Find the end of this meal section (next meal header or end of main content)

@@ -18,7 +18,6 @@ import { useTRPC } from '@/trpc/client'
 import {
   LOCATIONS,
   formatMealHours,
-  getApiMealKey,
   getAvailableMeals,
   getCurrentOrNextMeal,
   getMealHours,
@@ -227,9 +226,7 @@ function HomePage() {
 
   const mealItems = useMemo(() => {
     if (!menuQuery.data?.meals) return []
-    // Map display meal to API meal key (e.g., brunch -> lunch on weekends)
-    const apiMealKey = getApiMealKey(selectedMeal, selectedDate)
-    let items = menuQuery.data.meals[apiMealKey] || []
+    let items = menuQuery.data.meals[selectedMeal] || []
 
     if (hasActiveFilters) {
       items = items.filter((item) => {
@@ -280,11 +277,8 @@ function HomePage() {
   const availableMeals = useMemo(() => {
     const meals = menuQuery.data?.meals
     if (!meals) return new Set<Meal>()
-    // Check which display meals have data (considering brunch/lunch mapping)
     const allMeals: Array<Meal> = ['breakfast', 'brunch', 'lunch', 'dinner']
-    return new Set(
-      allMeals.filter((meal) => hasMealData(meal, meals, selectedDate)),
-    )
+    return new Set(allMeals.filter((meal) => hasMealData(meal, meals)))
   }, [menuQuery.data, selectedDate])
 
   const dateBoundsQuery = useQuery(
@@ -363,13 +357,12 @@ function HomePage() {
   // Spicy data is available when all items in the current meal have been classified
   const spicyDataAvailable = useMemo(() => {
     if (!menuQuery.data?.meals) return false
-    const apiMealKey = getApiMealKey(selectedMeal, selectedDate)
-    const items = menuQuery.data.meals[apiMealKey] || []
+    const items = menuQuery.data.meals[selectedMeal] || []
     if (items.length === 0) return false
     return items.every(
       (item) => item.isSpicy !== null && item.isSpicy !== undefined,
     )
-  }, [menuQuery.data, selectedMeal, selectedDate])
+  }, [menuQuery.data, selectedMeal])
 
   return (
     <PageWrapper>
